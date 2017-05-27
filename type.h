@@ -1,0 +1,5 @@
+
+enum Type{
+	NORMAL,
+	GRADIENT,
+};
