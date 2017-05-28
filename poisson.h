@@ -23,8 +23,9 @@ private:
 	int width;
 	int height;
 	int iterTimes;
-	void mkTempCos(int m, int n);
+	Mat* mkTempCos(int m, int n);
 	void calculate(int i,int j);
+	void subtract(int num,Mat* mat);
 	void run_normal();
 	void run_gradient();
 	void cal_gradient();
