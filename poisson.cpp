@@ -1,64 +1,93 @@
 #include "poisson.h"
-
+#include <fstream>
 Poisson::Poisson()
 {
-
+	//out.open("test.txt");
+	freopen("test.txt", "w", stdout);
 }
 
+void Poisson::print(Mat* temp)
+{
+	printf("%d %d\n", temp->rows, temp->cols);
+	for (int i = 0; i < temp->rows; i++){
+		printf("row %d: ", i+1);
+		for (int j = 0; j < temp->cols; j++){
+			printf("%.6f ",temp->at<Vec3f>(i, j)[0]);
+		}
+		printf("\n");
+	}
+	printf("...............");
+}
 Mat* Poisson::mkTempCos(int m, int n)
 {
 	int factor = 10;
 	int max = 1;
 	int min = 0;
+	int _i = 0, _j = 0;
 	float* weight = new float[factor];
 	Mat* temp = new Mat(Size(n,m), CV_32FC3, Scalar(0)); 
 	for (int i = 0; i < factor; i++) {
-		weight[i] = (max - min)*(cos(PI*i / factor) + 1);
+		weight[i] = 1.0*(max - min)*(cos(PI*i / factor) + 1)/2 + min;
 	}
+	
+	for (int i = factor; i < m - factor; i++){
+		_j = 0;
+		for (int j = 0; j < factor; j++){
+			temp->at<Vec3f>(i, j)[0] = weight[_j];
+			temp->at<Vec3f>(i, j)[1] = weight[_j];
+			temp->at<Vec3f>(i, j)[2] = weight[_j];
+			_j++;
+		}
+	}
+	
+	for (int i = factor; i < m - factor; i++){
+		_j = 1;
+		for (int j = n - factor; j < n; j++){
+			temp->at<Vec3f>(i, j)[0] = weight[factor - _j];
+			temp->at<Vec3f>(i, j)[1] = weight[factor - _j];
+			temp->at<Vec3f>(i, j)[2] = weight[factor - _j];
+			_j++;
+		}
+	}
+	
+	_i = 0;
 	for (int i = 0; i < factor; i++){
 		for (int j = factor; j < n - factor; j++){
-			temp->at<Vec3f>(i, j)[0] = weight[i];
-			temp->at<Vec3f>(i, j)[1] = weight[i];
-			temp->at<Vec3f>(i, j)[2] = weight[i];
+			temp->at<Vec3f>(i, j)[0] = weight[_i];
+			temp->at<Vec3f>(i, j)[1] = weight[_i];
+			temp->at<Vec3f>(i, j)[2] = weight[_i];
 		}
+		_i++;
 	}
-	for (int i = factor; i < m - factor; i++){
-		for (int j = 0; j < factor; j++){
-			temp->at<Vec3f>(i, j)[0] = weight[j];
-			temp->at<Vec3f>(i, j)[1] = weight[j];
-			temp->at<Vec3f>(i, j)[2] = weight[j];
-		}
-	}
-	for (int i = factor; i < m - factor; i++){
-		for (int j = n - factor; j < n; j++){
-			temp->at<Vec3f>(i, j)[0] = weight[factor - j];
-			temp->at<Vec3f>(i, j)[1] = weight[factor - j];
-			temp->at<Vec3f>(i, j)[2] = weight[factor - j];
-		}
-	}
+	
+	_i = 1;
 	for (int i = m - factor; i < m; i++){
 		for (int j = factor; j < n - factor; j++){
-			temp->at<Vec3f>(i, j)[0] = weight[factor - i];
-			temp->at<Vec3f>(i, j)[1] = weight[factor - i];
-			temp->at<Vec3f>(i, j)[2] = weight[factor - i];
+			temp->at<Vec3f>(i, j)[0] = weight[factor - _i];
+			temp->at<Vec3f>(i, j)[1] = weight[factor - _i];
+			temp->at<Vec3f>(i, j)[2] = weight[factor - _i];
 		}
+		_i++;
 	}
+	
 	for (int i = 0; i < factor; i++){
 		for (int j = 0; j < factor; j++){
 			if (i > j){
-				temp->at<Vec3f>(i, j)[0] = weight[i];
-				temp->at<Vec3f>(i, j)[1] = weight[i];
-				temp->at<Vec3f>(i, j)[2] = weight[i];
-			}
-			else{
 				temp->at<Vec3f>(i, j)[0] = weight[j];
 				temp->at<Vec3f>(i, j)[1] = weight[j];
 				temp->at<Vec3f>(i, j)[2] = weight[j];
 			}
+			else{
+				temp->at<Vec3f>(i, j)[0] = weight[i];
+				temp->at<Vec3f>(i, j)[1] = weight[i];
+				temp->at<Vec3f>(i, j)[2] = weight[i];
+			}
 		}
 	}
-	int _i = 0, _j = 0;
+	
+	_i = 0;
 	for (int i = 0; i < factor; i++){
+		_j = 1;
 		for (int j = n - factor; j < n; j++){
 			temp->at<Vec3f>(i, j)[0] = temp->at<Vec3f>(_i, factor - _j)[0];
 			temp->at<Vec3f>(i, j)[1] = temp->at<Vec3f>(_i, factor - _j)[1];
@@ -68,8 +97,9 @@ Mat* Poisson::mkTempCos(int m, int n)
 		_i++;
 	}
 
-	_i = 0, _j = 0;
+	_i = 1;
 	for (int i = m - factor; i < m; i++){
+		_j = 0;
 		for (int j = 0; j < factor; j++){
 			temp->at<Vec3f>(i, j)[0] = temp->at<Vec3f>(factor - _i, _j)[0];
 			temp->at<Vec3f>(i, j)[1] = temp->at<Vec3f>(factor - _i, _j)[1];
@@ -79,8 +109,9 @@ Mat* Poisson::mkTempCos(int m, int n)
 		_i++;
 	}
 
-	_i = 0, _j = 0;
+	_i = 1;
 	for (int i = m - factor; i < m; i++){
+		_j = 1;
 		for (int j = n - factor; j < n; j++){
 			temp->at<Vec3f>(i, j)[0] = temp->at<Vec3f>(factor - _i, factor - _j)[0];
 			temp->at<Vec3f>(i, j)[1] = temp->at<Vec3f>(factor - _i, factor - _j)[1];
@@ -89,6 +120,7 @@ Mat* Poisson::mkTempCos(int m, int n)
 		}
 		_i++;
 	}
+//	print(temp);
 	delete[] weight;
 	return temp;
 	

@@ -8,6 +8,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include "type.h"
+#include <fstream>
 using namespace cv;
 class Poisson
 {
@@ -29,6 +30,9 @@ private:
 	void run_normal();
 	void run_gradient();
 	void cal_gradient();
+	void print(Mat* temp);
+	std::ofstream out;
+
 public:
 	Poisson();
 	void set(Mat* src,Mat* add, int times,int x,int y,int w,int h);
