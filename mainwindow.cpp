@@ -40,3 +40,8 @@ void MainWindow::on_clearpushButton_clicked()
 {
     back->clear();
 }
+
+void MainWindow::on_finishpushButton_clicked()
+{
+    back->finish();
+}

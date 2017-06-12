@@ -45,6 +45,7 @@ void backwindow::open(QString filename)
     flag=true;
 
     srcImg = image.clone();
+    cvtColor(srcImg,srcImg,CV_RGB2BGR);
     w = image.cols;
     h = image.rows;
 
@@ -98,6 +99,49 @@ void backwindow::clear()
     update();
 }
 
+void backwindow::finish()
+{
+    fitmask = maskImg.clone();
+    fitsrc = srcImg.clone();
+
+    int xmin,xmax,ymin,ymax;
+    xmin=ymin=10000;
+    xmax=ymax=0;
+    for(int i=0;i<fitmask.rows;i++)
+    {
+        for(int j=0;j<fitmask.cols;j++)
+        {
+            if(fitmask.at<uchar>(i,j)==255)
+            {
+                if(xmin>j)
+                {
+                    xmin=j;
+                }
+                if(xmax<j)
+                {
+                    xmax=j;
+                }
+                if(ymin>i)
+                {
+                    ymin=i;
+                }
+                if(ymax<i)
+                {
+                    ymax=i;
+                }
+
+            }
+        }
+    }
+    if(ymin==0) ymin=1;
+    if(xmin==0) xmin=1;
+    if(xmax==w-1) xmax=w-2;
+    if(ymax==h-1) ymax=h-2;
+    fitmask=fitmask(Range(ymin-1,ymax+2),Range(xmin-1,xmax+2));
+    fitsrc=fitsrc(Range(ymin-1,ymax+2),Range(xmin-1,xmax+2));
+    imshow("mask",fitsrc);
+}
+
 void backwindow::paintEvent(QPaintEvent *e)
 {
     QPainter painter(this);
@@ -138,7 +182,6 @@ void backwindow::mousePressEvent(QMouseEvent *e)
             for(int i=0;i<=inum;i++){
                 drawContours(maskImg,co_ordinates, i, Scalar(255), CV_FILLED, 8 );
             }
-            qDebug()<<maskImg.cols<<maskImg.rows;
             imshow("a",maskImg);
         }
     }

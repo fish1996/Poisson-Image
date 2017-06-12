@@ -52,6 +52,8 @@ private:
 public:
     int width;
     int height;
+    Mat fitsrc;
+    Mat fitmask;
 
 protected:
     void paintEvent(QPaintEvent *); //绘制函数
@@ -66,6 +68,7 @@ public:
     void start();
     void open(QString filename);
     void clear();
+    void finish();
 };
 
 #endif // BACKWINDOW_H
