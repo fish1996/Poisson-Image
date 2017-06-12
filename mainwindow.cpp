@@ -8,10 +8,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     back = new backwindow(this);
-
     ui->imageLayout->addWidget(back);
-    back->width=400;
-    back->height=400;
+
+    back->width=300;
+    back->height=300;
 }
 
 MainWindow::~MainWindow()

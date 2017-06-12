@@ -27,13 +27,13 @@
      <string>Choose</string>
     </property>
    </widget>
-   <widget class="QWidget" name="verticalLayoutWidget">
+   <widget class="QWidget" name="verticalWidget" native="true">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>40</y>
-      <width>411</width>
-      <height>271</height>
+      <x>140</x>
+      <y>30</y>
+      <width>401</width>
+      <height>301</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="imageLayout"/>

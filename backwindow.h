@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <vector>
 #include <QMouseEvent>
+#include <QTimer>
 #include <QPixmap>
 #include <QPropertyAnimation>
 #include <QPainter>
@@ -33,19 +34,20 @@ private:
     Mat image;
     QPixmap pix;
 
-    /*int *x; //鼠标点击获取横坐标数组
-    int *y; //鼠标点击获取纵坐标数组
-    int num; //点数量*/
     bool flag; //开始绘制
     bool flags; //是否完成绘制
     int inum; //表示封闭区域数量-1
 
     Mat srcImg;
     Mat maskImg;
+    int w; //实际变成的大小
+    int h;
     Poisson* poisson;
     Point pt_origin;
     Point pt_Cur;
     vector< vector<Point>>  co_ordinates;
+
+    QTimer *timer; //计时器
 
 public:
     int width;
@@ -55,6 +57,10 @@ protected:
     void paintEvent(QPaintEvent *); //绘制函数
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *);
+    void mouseReleaseEvent(QMouseEvent *);
+
+private:
+    Mat resizemat(Mat img); //适当调整图像大小
 
 public:
     void start();
