@@ -177,6 +177,9 @@ void Poisson::set(Mat* src, Mat* add, Mat* mask,int times, int x, int y, int w, 
 
 void Poisson::calculate(int i,int j)
 {
+    if(isMask && maskImg->at<float>(i,j)==0) {
+        return;
+    }
     tmp.at<Vec3f>(i, j)[0] = (tmp.at<Vec3f>(i - 1, j)[0]
         + tmp.at<Vec3f>(i + 1, j)[0]
         + tmp.at<Vec3f>(i, j - 1)[0]
@@ -199,7 +202,6 @@ void Poisson::run_texture()
     cal_gradient();
 
     tmp = (*srcImg)(Rect(begin, end, width, height));
-
     for (int k = 0; k <iterTimes; k++){
         for (int i = 1; i < tmp.rows - 1; i++){
             for (int j = 1; j < tmp.cols - 1; j++){
@@ -214,8 +216,12 @@ void Poisson::run_normal()
 {
     cal_gradient();
 
-    tmp = (*srcImg)(Rect(begin, end, width, height));
+    if(!isMask) {
+        tmp = (*srcImg)(Rect(begin, end, width, height));
+    }
+    else if(isMask) {
 
+    }
     for (int k = 0; k <iterTimes; k++){
         for (int i = 1; i < tmp.rows - 1; i++){
             for (int j = 1; j < tmp.cols - 1; j++){
@@ -309,9 +315,12 @@ Mat* Poisson::run(Type type)
 {
     srcImg->convertTo(*srcImg, CV_32F, 1.0f / 255);
     addImg->convertTo(*addImg, CV_32F, 1.0f / 255);
-    maskImg->convertTo(*maskImg, CV_32F, 1.0f / 255);
+    if(maskImg!=nullptr) {
+        maskImg->convertTo(*maskImg, CV_32F, 1.0f / 255);
+        resize(*maskImg, *maskImg, Size(width, height));
+    }
     resize(*addImg, *addImg, Size(width, height));
-    resize(*maskImg, *maskImg, Size(width, height));
+
     gradient = new Mat(addImg->size(), CV_32FC3);
 
     if (type == Type::NORMAL){
@@ -325,6 +334,9 @@ Mat* Poisson::run(Type type)
     }
     else if (type == Type::COLOR) {
         run_color();
+    }
+    if(maskImg != nullptr) {
+        delete maskImg;
     }
     delete addImg;
     delete gradient;

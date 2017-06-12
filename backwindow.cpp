@@ -105,6 +105,7 @@ void backwindow::mousePressEvent(QMouseEvent *e)
                 drawContours(maskImg,co_ordinates, i, Scalar(255), CV_FILLED, 8 );
             }
             imshow("a",maskImg);
+            start();
         }
     }
 
@@ -130,7 +131,11 @@ void backwindow::mouseMoveEvent(QMouseEvent *e)
 }
 
 void backwindow::start(){
-    Mat src = imread("2.jpg");
+    Mat src = imread("1.jpg");
+    qDebug()<<"sourcesize = "<<src.rows << " "<<src.cols;
+    qDebug()<<"masksize = "<<maskImg.rows << " "<<maskImg.cols;
     poisson = new Poisson();
-    poisson->set(&src,&srcImg,&maskImg,3000,190, 150, 100,60);
+    poisson->set(&src,&srcImg,&maskImg,3000,100, 100, 100,60);
+    Mat* ans = poisson->run(Type::NORMAL);
+    imshow("miao",*ans);
 }
