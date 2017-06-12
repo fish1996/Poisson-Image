@@ -1,14 +1,11 @@
-#include "poisson.h"
+#include "mainwindow.h"
+#include <QApplication>
 
-int main()
+int main(int argc, char *argv[])
 {
-	Poisson p;
-	Mat src = imread("2.jpg");
-	Mat dst = imread("2.png");
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
 
-	p.set(&src,&dst,300,170, 150, 100, 50);
-	Mat* ans = p.run(GRADIENT);
-	imshow("1", *ans);
-	waitKey(10);
-	system("pause");
+    return a.exec();
 }
