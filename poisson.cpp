@@ -1,14 +1,17 @@
 ﻿
 #include "poisson.h"
 #include <fstream>
+#include <qDebug>
 Poisson::Poisson()
 {
     PI = 3.14159;
+}
+
+void Poisson::init()
+{
     srcImg = nullptr;
     addImg = nullptr;
     maskImg = nullptr;
-    //out.open("test.txt");
-    //freopen("test.txt", "w", stdout);
 }
 
 void Poisson::print(Mat* temp)
@@ -141,14 +144,15 @@ void Poisson::subtract(int num, Mat* mat)
 
 void Poisson::set(Mat* src, Mat* add, int times, int x, int y, int w, int h, float mi, float ma, int fa)
 {
+    init();
     isMask = false;
     srcImg = new Mat();
     addImg = new Mat();
     *srcImg = src->clone();
     *addImg = add->clone();
     iterTimes = times;
-    begin = x;
-    end = y;
+    beginw = x;
+    beginh = y;
     width = w;
     height = h;
     min = mi;
@@ -156,9 +160,40 @@ void Poisson::set(Mat* src, Mat* add, int times, int x, int y, int w, int h, flo
     factor = fa;
 }
 
+void Poisson::set(Mat* src, Mat* mask,Color c,int times, int x, int y, int w, int h)
+{
+    init();
+    isMask = true;
+    srcImg = new Mat();
+    maskImg = new Mat();
+    *srcImg = src->clone();
+    *maskImg = mask->clone();
+    iterTimes = times;
+    color = c;
+    beginw = x;
+    beginh = y;
+    width = w;
+    height = h;
+}
+
+void Poisson::set(Mat* src, Color c,int times, int x, int y, int w, int h)
+{
+    init();
+    isMask = false;
+    srcImg = new Mat();
+    color = c;
+    *srcImg = src->clone();
+    iterTimes = times;
+    beginw = x;
+    beginh = y;
+    width = w;
+    height = h;
+}
+
 void Poisson::set(Mat* src, Mat* add, Mat* mask,int times, int x, int y, int w, int h, float mi, float ma, int fa)
 {
-    isMask = false;
+    init();
+    isMask = true;
     srcImg = new Mat();
     addImg = new Mat();
     maskImg = new Mat();
@@ -166,8 +201,8 @@ void Poisson::set(Mat* src, Mat* add, Mat* mask,int times, int x, int y, int w, 
     *addImg = add->clone();
     *maskImg = mask->clone();
     iterTimes = times;
-    begin = x;
-    end = y;
+    beginw = x;
+    beginh = y;
     width = w;
     height = h;
     min = mi;
@@ -199,9 +234,15 @@ void Poisson::calculate(int i,int j)
 
 void Poisson::run_texture()
 {
-    cal_gradient();
 
-    tmp = (*srcImg)(Rect(begin, end, width, height));
+}
+
+
+void Poisson::run_normal()
+{
+    cal_gradient(addImg);
+
+    tmp = (*srcImg)(Rect(beginw, beginh, width, height));
     for (int k = 0; k <iterTimes; k++){
         for (int i = 1; i < tmp.rows - 1; i++){
             for (int j = 1; j < tmp.cols - 1; j++){
@@ -211,47 +252,43 @@ void Poisson::run_texture()
     }
 }
 
-
-void Poisson::run_normal()
+void Poisson::multi_color()
 {
-    cal_gradient();
-
-    if(!isMask) {
-        tmp = (*srcImg)(Rect(begin, end, width, height));
-    }
-    else if(isMask) {
-
-    }
-    for (int k = 0; k <iterTimes; k++){
-        for (int i = 1; i < tmp.rows - 1; i++){
-            for (int j = 1; j < tmp.cols - 1; j++){
-                calculate(i, j);
+    for(int i = 0;i < gradient->rows;i++) {
+        for(int j = 0;j < gradient->cols;j++) {
+            if(isMask && maskImg->at<float>(i,j)==0) {
+                continue;
             }
+            gradient->at<Vec3f>(i,j)[0] *= color.b;
+            gradient->at<Vec3f>(i,j)[1] *= color.g;
+            gradient->at<Vec3f>(i,j)[2] *= color.r;
         }
     }
 }
 
 void Poisson::run_color()
 {
-    cal_gradient();
+    tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+    cal_gradient(&tmp);
+
+    multi_color();
+
+    solve_poisson1();
 }
 
-void Poisson::run_gradient()
+void Poisson::solve_poisson1()
 {
-    cal_gradient();
-
-    Mat* alpha = mkTempCos(addImg->rows, addImg->cols);
-
-    subtract(1, alpha);
-
-    if(!isMask) {
-        tmp = (*srcImg)(Rect(begin, end, width, height));
+    for (int k = 0; k <iterTimes; k++){
+        for (int i = 1; i < tmp.rows - 1; i++){
+            for (int j = 1; j < tmp.cols - 1; j++){
+                calculate(i, j);
+            }
+        }
     }
-    else {
-        tmp = (*srcImg)(Rect(begin, end, width, height));
-    }
-    Mat origin = tmp.clone();
+}
 
+void Poisson::solve_poisson2()
+{
     for (int k = 0; k <iterTimes; k++) {
         for (int i = 1; i < tmp.rows - 1; i += 2) {
             for (int j = 1; j < tmp.cols - 1; j += 2) {
@@ -274,6 +311,24 @@ void Poisson::run_gradient()
             }
         }
     }
+}
+
+void Poisson::run_gradient()
+{
+    cal_gradient(addImg);
+
+    Mat* alpha = mkTempCos(addImg->rows, addImg->cols);
+
+    subtract(1, alpha);
+
+    if(!isMask) {
+        tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+    }
+    else {
+        tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+    }
+    Mat origin = tmp.clone();
+    solve_poisson2();
 
     for (int i = 0; i < tmp.rows; i++){
         for (int j = 0; j < tmp.cols; j++){
@@ -288,25 +343,28 @@ void Poisson::run_gradient()
     delete alpha;
 }
 
-void Poisson::cal_gradient()
+void Poisson::cal_gradient(Mat* img)
 {
-    for (int i = 1; i < addImg->rows - 1; i++) {
-        for (int j = 1; j < addImg->cols - 1; j++) {
-            gradient->at<Vec3f>(i, j)[0] = addImg->at<Vec3f>(i - 1, j)[0]
-                + addImg->at<Vec3f>(i + 1, j)[0]
-                + addImg->at<Vec3f>(i, j - 1)[0]
-                + addImg->at<Vec3f>(i, j + 1)[0]
-                - 4 * addImg->at<Vec3f>(i, j)[0];
-            gradient->at<Vec3f>(i, j)[1] = addImg->at<Vec3f>(i - 1, j)[1]
-                + addImg->at<Vec3f>(i + 1, j)[1]
-                + addImg->at<Vec3f>(i, j - 1)[1]
-                + addImg->at<Vec3f>(i, j + 1)[1]
-                - 4 * addImg->at<Vec3f>(i, j)[1];
-            gradient->at<Vec3f>(i, j)[2] = addImg->at<Vec3f>(i - 1, j)[2]
-                + addImg->at<Vec3f>(i + 1, j)[2]
-                + addImg->at<Vec3f>(i, j - 1)[2]
-                + addImg->at<Vec3f>(i, j + 1)[2]
-                - 4 * addImg->at<Vec3f>(i, j)[2];
+    for (int i = 1; i < img->rows - 1; i++) {
+        for (int j = 1; j < img->cols - 1; j++) {
+            if(isMask && maskImg->at<float>(i,j)==0){
+                continue;
+            }
+            gradient->at<Vec3f>(i, j)[0] = img->at<Vec3f>(i - 1, j)[0]
+                + img->at<Vec3f>(i + 1, j)[0]
+                + img->at<Vec3f>(i, j - 1)[0]
+                + img->at<Vec3f>(i, j + 1)[0]
+                - 4 * img->at<Vec3f>(i, j)[0];
+            gradient->at<Vec3f>(i, j)[1] = img->at<Vec3f>(i - 1, j)[1]
+                + img->at<Vec3f>(i + 1, j)[1]
+                + img->at<Vec3f>(i, j - 1)[1]
+                + img->at<Vec3f>(i, j + 1)[1]
+                - 4 * img->at<Vec3f>(i, j)[1];
+            gradient->at<Vec3f>(i, j)[2] = img->at<Vec3f>(i - 1, j)[2]
+                + img->at<Vec3f>(i + 1, j)[2]
+                + img->at<Vec3f>(i, j - 1)[2]
+                + img->at<Vec3f>(i, j + 1)[2]
+                - 4 * img->at<Vec3f>(i, j)[2];
         }
     }
 }
@@ -314,31 +372,36 @@ void Poisson::cal_gradient()
 Mat* Poisson::run(Type type)
 {
     srcImg->convertTo(*srcImg, CV_32F, 1.0f / 255);
-    addImg->convertTo(*addImg, CV_32F, 1.0f / 255);
+    if(addImg != nullptr) {
+        addImg->convertTo(*addImg, CV_32F, 1.0f / 255);
+        resize(*addImg, *addImg, Size(width, height));
+    }
     if(maskImg!=nullptr) {
         maskImg->convertTo(*maskImg, CV_32F, 1.0f / 255);
         resize(*maskImg, *maskImg, Size(width, height));
     }
-    resize(*addImg, *addImg, Size(width, height));
 
-    gradient = new Mat(addImg->size(), CV_32FC3);
 
-    if (type == Type::NORMAL){
+    gradient = new Mat(Size(width,height), CV_32FC3);
+
+    if (type == NORMAL){
         run_normal();
     }
-    else if (type == Type::GRADIENT){
+    else if (type == GRADIENT){
         run_gradient();
     }
-    else if (type == Type::TEXTURE) {
+    else if (type == TEXTURE) {
         run_texture();
     }
-    else if (type == Type::COLOR) {
+    else if (type == COLOR) {
         run_color();
     }
     if(maskImg != nullptr) {
         delete maskImg;
     }
-    delete addImg;
+    if(addImg != nullptr) {
+        delete addImg;
+    }
     delete gradient;
     return srcImg;
 }

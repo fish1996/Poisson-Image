@@ -8,46 +8,58 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include "type.h"
-#include <fstream>
+#include "color.h"
+
 using namespace cv;
 class Poisson
 {
 private:
     float PI;
-    Mat* gradient;
-    Mat* srcImg;
-    Mat* addImg;
-    Mat* maskImg;
+    Mat* gradient; //梯度矩阵
+    Mat* srcImg; //原图
+    Mat* addImg; //加上的图
+    Mat* maskImg; //掩码图
 
-    Mat dst;
-    Mat tmp;
+    Mat tmp; //临时图，存的信息是ROI图像（感兴趣区域）,矩形
 
-    int begin;
-    int end;
+    Color color;//颜色
+
+    //选区位置
+    int beginw;
+    int beginh;
     int width;
     int height;
-    int iterTimes;
+
+    int iterTimes;// iterTimes迭代次数
     int factor;
     float max;
     float min;
-    bool isMask;
-    Mat* mkTempCos(int m, int n);
-    void calculate(int i,int j);
-    void subtract(int num,Mat* mat);
+    bool isMask;//是否有掩码图
+    Mat* mkTempCos(int m, int n);//优化函数
+    void calculate(int i,int j);//求解泊松方程
+    void subtract(int num,Mat* mat);//数字减去矩阵
+
     void run_normal();
     void run_gradient();
     void run_color();
     void run_texture();
-    void cal_gradient();
 
-    void print(Mat* temp);
-    std::ofstream out;
+    void multi_color();//颜色通道乘法
+    void cal_gradient(Mat* img);//求导
+
+    void print(Mat* temp);//矩阵输出
+    void solve_poisson1();//求解泊松方法1
+    void solve_poisson2();//求解泊松方法2
+
+    void init();
 
 public:
     Poisson();
+    void set(Mat* src, Mat* mask,Color c,int times, int x, int y, int w, int h);
+    void set(Mat* src, Color c,int times, int x, int y, int w, int h);
     void set(Mat* src, Mat* add, Mat* mask,int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
     void set(Mat* src, Mat* add, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
-    // iterTimes迭代次数
+
     Mat* run(Type type);
 
 };
