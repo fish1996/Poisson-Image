@@ -1,4 +1,4 @@
-ï»¿#ifndef POISSON_H
+#ifndef POISSON_H
 #define POISSON_H
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdlib.h>
@@ -14,53 +14,66 @@ using namespace cv;
 class Poisson
 {
 private:
-    float PI;
-    Mat* gradient; //æ¢¯åº¦çŸ©é˜µ
-    Mat* srcImg; //åŸå›¾
-    Mat* addImg; //åŠ ä¸Šçš„å›¾
-    Mat* maskImg; //æ©ç å›¾
+	float PI;
+	Mat* gradient; //Ìİ¶È¾ØÕó
+	Mat* srcImg; //Ô­Í¼
+	Mat* addImg; //¼ÓÉÏµÄÍ¼
+	Mat* maskImg; //ÑÚÂëÍ¼
 
-    Mat tmp; //ä¸´æ—¶å›¾ï¼Œå­˜çš„ä¿¡æ¯æ˜¯ROIå›¾åƒï¼ˆæ„Ÿå…´è¶£åŒºåŸŸï¼‰,çŸ©å½¢
+	Mat* magnitude;
 
-    Color color;//é¢œè‰²
+	Mat tmp; //ÁÙÊ±Í¼£¬´æµÄĞÅÏ¢ÊÇROIÍ¼Ïñ£¨¸ĞĞËÈ¤ÇøÓò£©,¾ØĞÎ
 
-    //é€‰åŒºä½ç½®
-    int beginw;
-    int beginh;
-    int width;
-    int height;
+	Color color;//ÑÕÉ«
 
-    int iterTimes;// iterTimesè¿­ä»£æ¬¡æ•°
-    int factor;
-    float max;
-    float min;
-    bool isMask;//æ˜¯å¦æœ‰æ©ç å›¾
-    Mat* mkTempCos(int m, int n);//ä¼˜åŒ–å‡½æ•°
-    void calculate(int i,int j);//æ±‚è§£æ³Šæ¾æ–¹ç¨‹
-    void subtract(int num,Mat* mat);//æ•°å­—å‡å»çŸ©é˜µ
+				//Ñ¡ÇøÎ»ÖÃ
+	int beginw;
+	int beginh;
+	int width;
+	int height;
 
-    void run_normal();
-    void run_gradient();
-    void run_color();
-    void run_texture();
+	float alpha;
+	float beta;
 
-    void multi_color();//é¢œè‰²é€šé“ä¹˜æ³•
-    void cal_gradient(Mat* img);//æ±‚å¯¼
+	int iterTimes;// iterTimesµü´ú´ÎÊı
+	int factor;
+	float max;
+	float min;
+	bool isMask;//ÊÇ·ñÓĞÑÚÂëÍ¼
+	Mat* mkTempCos(int m, int n);//ÓÅ»¯º¯Êı
+	void calculate(int i, int j);//Çó½â²´ËÉ·½³Ì
+	void subtract(int num, Mat* mat);//Êı×Ö¼õÈ¥¾ØÕó
+	float pow2(float x);
 
-    void print(Mat* temp);//çŸ©é˜µè¾“å‡º
-    void solve_poisson1();//æ±‚è§£æ³Šæ¾æ–¹æ³•1
-    void solve_poisson2();//æ±‚è§£æ³Šæ¾æ–¹æ³•2
+	void run_normal();
+	void run_gradient();
+	void run_color();
+	void run_texture();
+	void run_light();
 
-    void init();
+	void cal_light(float& g,float m);
+	void multi_light();
+	void multi_color();//ÑÕÉ«Í¨µÀ³Ë·¨
+	void cal_gradient(Mat* img);//Çóµ¼
+	void cal_magnitude();
+	void cal_magnitude(int i, int j, int k);
+
+	void print(Mat* temp);//¾ØÕóÊä³ö
+	void solve_poisson1();//Çó½â²´ËÉ·½·¨1
+	void solve_poisson2();//Çó½â²´ËÉ·½·¨2
+
+	void init();
 
 public:
-    Poisson();
-    void set(Mat* src, Mat* mask,Color c,int times, int x, int y, int w, int h);
-    void set(Mat* src, Color c,int times, int x, int y, int w, int h);
-    void set(Mat* src, Mat* add, Mat* mask,int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
-    void set(Mat* src, Mat* add, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
+	Poisson();
+	void set(Mat* src, Mat* mask, Color c, int times, int x, int y, int w, int h);
+	void set(Mat* src, Color c, int times, int x, int y, int w, int h);
+	void set(Mat* src, Mat* mask, float alpha, float beta, int times, int x, int y, int w, int h);
+	void set(Mat* src, float a, float b, int times, int x, int y, int w, int h);
+	void set(Mat* src, Mat* add, Mat* mask, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
+	void set(Mat* src, Mat* add, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
 
-    Mat* run(Type type);
+	Mat* run(Type type);
 
 };
 #endif
