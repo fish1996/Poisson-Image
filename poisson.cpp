@@ -374,30 +374,38 @@ void Poisson::run_texture()
 
 void Poisson::canny_texture(Mat out)
 {
-    Mat zeros(gradient->size(), CV_32FC3);
+    Mat zeros( gradient->size(), CV_32FC3);
     zeros.setTo(0);
     Mat zerosMask = ((out) != 255);
+    imshow("zerosMask",zerosMask);
 
-    for (int i = 0; i < gradient->rows; i++) {
-        for (int j = 0; j < gradient->cols; j++) {
-            if (isMask && maskImg->at<float>(i, j) == 0) {
+    for(int i = 0;i < gradient->rows;i++) {
+        for(int j = 0;j < gradient->cols;j++) {
+            if(isMask && maskImg->at<float>(i,j)==0) {
                 continue;
             }
             else{
-                if (zerosMask.at<float>(i, j) != 0){
-                    gradient->at<Vec3f>(i, j)[0] *= 0;
-                    gradient->at<Vec3f>(i, j)[1] *= 0;
-                    gradient->at<Vec3f>(i, j)[2] *= 0;
-                }
-                else
-                {
-                    gradient->at<Vec3f>(i, j)[0] *= gradientX->at<Vec3f>(i, j)[0] - gradientY->at<Vec3f>(i, j)[0];
-                    gradient->at<Vec3f>(i, j)[1] *= gradientX->at<Vec3f>(i, j)[1] - gradientY->at<Vec3f>(i, j)[1];
-                    gradient->at<Vec3f>(i, j)[2] *= gradientX->at<Vec3f>(i, j)[2] - gradientY->at<Vec3f>(i, j)[2];
+                if(zerosMask.at<float>(i,j)!=0){
+                    gradientX->at<Vec3f>(i,j)[0] *= 0;
+                    gradientX->at<Vec3f>(i,j)[1] *= 0;
+                    gradientX->at<Vec3f>(i,j)[2] *= 0;
+                    gradientY->at<Vec3f>(i,j)[0] *= 0;
+                    gradientY->at<Vec3f>(i,j)[1] *= 0;
+                    gradientY->at<Vec3f>(i,j)[2] *= 0;
                 }
             }
         }
     }
+
+    Mat* newgradientX = new Mat(Size(width,height), CV_32FC3);
+    Mat* newgradientY = new Mat(Size(width,height), CV_32FC3);
+
+    cal_LaplacianX(gradientX,newgradientX);
+    cal_LaplacianY(gradientY,newgradientY);
+    *gradient = (*newgradientX) + (*newgradientY);
+
+    delete newgradientX;
+    delete newgradientY;
 }
 
 void Poisson::solve_poisson1()
@@ -750,6 +758,15 @@ Mat* Poisson::run(Type type)
     }
     if (gradientY != nullptr) {
         delete gradientY;
+    }
+    if (srcgradientX != nullptr) {
+        delete gradientX;
+    }
+    if (srcgradientY != nullptr) {
+        delete gradientY;
+    }
+    if (srcgradient != nullptr) {
+        delete gradientX;
     }
     delete gradient;
     return srcImg;

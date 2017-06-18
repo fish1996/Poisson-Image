@@ -210,7 +210,7 @@ void MyMenu::ChooseSrcActionSlot()
     filename = QFileDialog::getOpenFileName(this,
         QStringLiteral("选择图像"),
         "",
-        tr("Images (*.png *.bmp *.jpg *.tif *.GIF)")); //选择路径
+        tr("Images (*.png *.bmp *.jpg *.tif *.GIF *jpeg)")); //选择路径
     if(filename.isEmpty())
     {
         return;
@@ -227,7 +227,7 @@ void MyMenu::ChooseDstActionSlot()
     filename = QFileDialog::getOpenFileName(this,
         QStringLiteral("选择图像"),
         "",
-        tr("Images (*.png *.bmp *.jpg *.tif *.GIF)")); //选择路径
+        tr("Images (*.png *.bmp *.jpg *.tif *.GIF *jpeg)")); //选择路径
     if(filename.isEmpty())
     {
         return;
