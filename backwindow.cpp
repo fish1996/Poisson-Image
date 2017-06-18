@@ -25,8 +25,10 @@ backwindow::backwindow(QWidget* parent):QWidget(parent)
         timer->start(1000);
         qDebug()<<"timer start!";
     }
+
     fitw = 0;
     fith = 0;
+    choosenum = 0;
 }
 
 backwindow::~backwindow()
@@ -229,12 +231,10 @@ void backwindow::mousePressEvent(QMouseEvent *e)
 
             QPoint p=e->pos(); //获取鼠标点击处点
 
-            if(flag){ //获取初始形状
-                if(p.x()<width && p.y()<height){
-                    pt_origin = Point(e->x(),e->y());
-                    co_ordinates.push_back(vector<Point>());
-                    co_ordinates[inum].push_back(pt_origin);
-                }
+            if(p.x()<width && p.y()<height){
+                pt_origin = Point(e->x(),e->y());
+                co_ordinates.push_back(vector<Point>());
+                co_ordinates[inum].push_back(pt_origin);
             }
         }
     }
@@ -244,7 +244,9 @@ void backwindow::mousePressEvent(QMouseEvent *e)
 
 void backwindow::mouseMoveEvent(QMouseEvent *e)
 {
-    if(flag && !flags)
+    int startx = co_ordinates[inum][0].x;
+    int starty = co_ordinates[inum][0].y;
+    if(flag && !flags && choosenum == 1)
     {
         QPoint p=e->pos();
         if(p.x()<width && p.y()<height){
@@ -264,12 +266,34 @@ void backwindow::mouseMoveEvent(QMouseEvent *e)
             }
             co_ordinates[inum].push_back(pt_Cur);
 
-            /*qDebug()<<"flag"<<flag;
-            qDebug()<<p;
-            qDebug()<<inum;*/
         }
     }
+    else if(flag && !flags && choosenum == 0)
+    {
+        QPoint p=e->pos();
+        if(p.x()<width && p.y()<height){
+            pt_Cur = Point(p.x(),p.y());
+            if(pt_Cur.x>w){
+                pt_Cur.x=w;
+            }
+            if(pt_Cur.x<0){
+                pt_Cur.x=0;
+            }
+            if(pt_Cur.y>h)
+            {
+                pt_Cur.y=h;
+            }
+            if(pt_Cur.y<0){
+                pt_Cur.y=0;
+            }
+            co_ordinates[inum].clear();
 
+            co_ordinates[inum].push_back(Point(startx,starty));
+            co_ordinates[inum].push_back(Point(startx,pt_Cur.y));
+            co_ordinates[inum].push_back(Point(pt_Cur.x,pt_Cur.y));
+            co_ordinates[inum].push_back(Point(pt_Cur.x,starty));
+        }
+    }
     update();
 }
 
@@ -279,6 +303,17 @@ void backwindow::mouseReleaseEvent(QMouseEvent *e)
     {
         flags = true;
     }
+}
+
+void backwindow::GetChoose(int choose)
+{
+    choosenum = choose;
+}
+
+void backwindow::ChangeSize(int sw, int sh)
+{
+    cv::resize(fitmask, fitmask, Size(), (sw*1.0/fitw), (sh*1.0/fith));
+    cv::resize(fitsrc, fitsrc, Size(), (sw*1.0/fitw), (sh*1.0/fith));
 }
 
 void backwindow::start(int times, int x, int y, int w, int h, Type type){

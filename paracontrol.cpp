@@ -47,7 +47,7 @@ void para::updataOper(int oper)
 void para::updataChoose(int choosenum)
 {
     this->choosenum = choosenum;
-
+    ChangeChoose(choosenum);
     return;
 }
 
@@ -119,4 +119,9 @@ int para::GetHscaling()
 int para::GetVscaling()
 {
     return this->vscaling;
+}
+
+void para::ChangeChoose(int choosenum)
+{
+    scr->GetChoose(this->choosenum);
 }

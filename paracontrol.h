@@ -24,6 +24,7 @@ public:
     int GetIteration();
     int GetHscaling();
     int GetVscaling();
+    void ChangeChoose(int choosenum);
 
     backwindow *scr;
     backwindow *dst;

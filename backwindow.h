@@ -47,6 +47,8 @@ private:
     Point pt_Cur;
     vector< vector<Point>>  co_ordinates;
 
+    int choosenum;
+
     QTimer *timer; //计时器
 
 public:
@@ -63,6 +65,8 @@ public:
     Mat PutFitMask();
     void GetMask();
     void GetMaskAndSrc(Mat src, Mat mask);
+    void GetChoose(int choose);
+    void ChangeSize(int sw, int sh);
 
 protected:
     void paintEvent(QPaintEvent *); //绘制函数
