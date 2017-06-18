@@ -10,6 +10,9 @@ void Poisson::init()
 {
     gradientX = nullptr;
     gradientY = nullptr;
+    srcgradientX = nullptr;
+    srcgradientY = nullptr;
+    srcgradient = nullptr;
     srcImg = nullptr;
     addImg = nullptr;
     maskImg = nullptr;
@@ -355,6 +358,8 @@ void Poisson::run_texture()
 {
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
 
+    gradientX = new Mat(Size(width, height), CV_32FC3);
+    gradientY = new Mat(Size(width, height), CV_32FC3);
     cal_gradient(&tmp);
     cal_gradientX(&tmp, gradientX);
     cal_gradientY(&tmp, gradientY);
@@ -639,6 +644,12 @@ void Poisson::cal_LaplacianY(Mat* img, Mat* gradientY)
 
 void Poisson::run_mixed()
 {
+    srcgradient = new Mat(Size(width, height), CV_32FC3);
+    srcgradientX = new Mat(Size(width, height), CV_32FC3);
+    srcgradientY = new Mat(Size(width, height), CV_32FC3);
+    gradientX = new Mat(Size(width, height), CV_32FC3);
+    gradientY = new Mat(Size(width, height), CV_32FC3);
+
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
     cal_gradient(&tmp);
     gradient->copyTo(*srcgradient);
@@ -716,11 +727,6 @@ Mat* Poisson::run(Type type)
 
 
     gradient = new Mat(Size(width, height), CV_32FC3);
-    gradientX = new Mat(Size(width, height), CV_32FC3);
-    gradientY = new Mat(Size(width, height), CV_32FC3);
-    srcgradient = new Mat(Size(width, height), CV_32FC3);
-    srcgradientX = new Mat(Size(width, height), CV_32FC3);
-    srcgradientY = new Mat(Size(width, height), CV_32FC3);
 
     if (type == NORMAL) {
 
