@@ -15,45 +15,47 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     backwindow.cpp \
-    poisson.cpp
+    poisson.cpp \
+    chooseimg.cpp \
+    mymenu.cpp \
+    paracontrol.cpp
 
 HEADERS  += mainwindow.h \
     backwindow.h \
+    type.h \
     poisson.h \
-    type.h
+    chooseimg.h \
+    mymenu.h \
+    paracontrol.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    mainwindow.ui
 
 
 #INCLUDEPATH+=H:/opencv/opencv/build/include/opencv \
 #        H:/opencv/opencv/build/include/opencv2 \
 #                   H:/opencv/opencv/build/include
 
-#LIBS+= H:\opencv\opencv\build\x86\vc10\lib\opencv_ml2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_calib3d2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_contrib2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_core2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_features2d2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_flann2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_gpu2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_highgui2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_imgproc2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_legacy2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_objdetect2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_ts2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_video2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_nonfree2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_ocl2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_photo2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_stitching2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_superres2410.lib\
-#H:\opencv\opencv\build\x86\vc10\lib\opencv_videostab2410.lib\
+LIBS+=D:\opencv\build\x64\vc12\lib\opencv_ml2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_calib3d2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_contrib2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_core2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_features2d2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_flann2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_gpu2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_highgui2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_imgproc2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_legacy2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_objdetect2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_ts2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_video2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_nonfree2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_ocl2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_photo2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_stitching2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_superres2413.lib\
+D:\opencv\build\x64\vc12\lib\opencv_videostab2413.lib\
 
-INCLUDEPATH += /usr/local/include
-INCLUDEPATH += /usr/local/include/opencv
-INCLUDEPATH += /usr/local/include/opencv2
-
-LIBS += -L/usr/local/lib \
-     -lopencv_core \
-     -lopencv_highgui \
-     -lopencv_imgproc \
+INCLUDEPATH += d:\opencv\build\include\
+INCLUDEPATH += d:\opencv\build\include\opencv\
+INCLUDEPATH += d:\opencv\build\include\opencv2\

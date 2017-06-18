@@ -1,5 +1,6 @@
 #include "poisson.h"
 #include <fstream>
+#include <QDebug>
 
 Poisson::Poisson()
 {
@@ -247,11 +248,29 @@ void Poisson::set(Mat* src, Mat* mask, float a, float b, int times, int x, int y
 	magnitude = new Mat(Size(width, height), CV_32FC3);
 }
 
+void Poisson::set(Mat* src, Mat* mask, float lt, float ht, int size, int times, int x, int y, int w, int h)
+{
+    init();
+    isMask = true;
+    srcImg = new Mat();
+    maskImg = new Mat();
+    *srcImg = src->clone();
+    *maskImg = mask->clone();
+    iterTimes = times;
+    beginw = x;
+    beginh = y;
+    width = w;
+    height = h;
+    low = lt;
+    high = ht;
+    ksize = size;
+}
+
 void Poisson::calculate(int i, int j)
 {
 	if (isMask && maskImg->at<float>(i, j) == 0) {
 		return;
-	}
+    }
 	tmp.at<Vec3f>(i, j)[0] = (tmp.at<Vec3f>(i - 1, j)[0]
 		+ tmp.at<Vec3f>(i + 1, j)[0]
 		+ tmp.at<Vec3f>(i, j - 1)[0]
@@ -268,12 +287,6 @@ void Poisson::calculate(int i, int j)
 		+ tmp.at<Vec3f>(i, j + 1)[2]
 		- gradient->at<Vec3f>(i, j)[2]) / 4;
 }
-
-void Poisson::run_texture()
-{
-
-}
-
 
 void Poisson::run_normal()
 {
@@ -327,6 +340,55 @@ void Poisson::run_color()
 	multi_color();
 
 	solve_poisson1();
+}
+
+void Poisson::run_texture()
+{
+    tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+
+    cal_gradient(&tmp);
+    cal_gradientX(&tmp,gradientX);
+    cal_gradientY(&tmp,gradientY);
+
+    Mat ctmp=tmp.clone();
+    cvtColor(ctmp,ctmp,CV_BGR2GRAY);  //canny只处理灰度图
+    ctmp.convertTo(ctmp,CV_8UC1,255);
+    Mat out = Mat(tmp.size(),CV_8UC1);
+    Canny(ctmp,out,low,high,ksize);
+    imshow("showcanny",out);
+    canny_texture(out);
+
+    imshow("tmp",tmp);
+
+    solve_poisson2();
+}
+
+void Poisson::canny_texture(Mat out)
+{
+    Mat zeros( gradient->size(), CV_32FC3);
+    zeros.setTo(0);
+    Mat zerosMask = ((out) != 255);
+
+    for(int i = 0;i < gradient->rows;i++) {
+        for(int j = 0;j < gradient->cols;j++) {
+            if(isMask && maskImg->at<float>(i,j)==0) {
+                continue;
+            }
+            else{
+                if(zerosMask.at<float>(i,j)!=0){
+                    gradient->at<Vec3f>(i,j)[0] *= 0;
+                    gradient->at<Vec3f>(i,j)[1] *= 0;
+                    gradient->at<Vec3f>(i,j)[2] *= 0;
+                }
+                else
+                {
+                    gradient->at<Vec3f>(i,j)[0] *= gradientX->at<Vec3f>(i,j)[0] - gradientY->at<Vec3f>(i,j)[0];
+                    gradient->at<Vec3f>(i,j)[1] *= gradientX->at<Vec3f>(i,j)[1] - gradientY->at<Vec3f>(i,j)[1];
+                    gradient->at<Vec3f>(i,j)[2] *= gradientX->at<Vec3f>(i,j)[2] - gradientY->at<Vec3f>(i,j)[2];
+                }
+            }
+        }
+    }
 }
 
 void Poisson::solve_poisson1()
@@ -434,33 +496,192 @@ void Poisson::run_gradient()
 
 void Poisson::cal_gradient(Mat* img)
 {
+    qDebug("%d\n", img->channels());
 	for (int i = 1; i < img->rows - 1; i++) {
 		for (int j = 1; j < img->cols - 1; j++) {
 			if (isMask && maskImg->at<float>(i, j) == 0) {
 				continue;
 			}
-			gradient->at<Vec3f>(i, j)[0] = img->at<Vec3f>(i - 1, j)[0]
-				+ img->at<Vec3f>(i + 1, j)[0]
-				+ img->at<Vec3f>(i, j - 1)[0]
-				+ img->at<Vec3f>(i, j + 1)[0]
-				- 4 * img->at<Vec3f>(i, j)[0];
-			gradient->at<Vec3f>(i, j)[1] = img->at<Vec3f>(i - 1, j)[1]
-				+ img->at<Vec3f>(i + 1, j)[1]
-				+ img->at<Vec3f>(i, j - 1)[1]
-				+ img->at<Vec3f>(i, j + 1)[1]
-				- 4 * img->at<Vec3f>(i, j)[1];
-			gradient->at<Vec3f>(i, j)[2] = img->at<Vec3f>(i - 1, j)[2]
-				+ img->at<Vec3f>(i + 1, j)[2]
-				+ img->at<Vec3f>(i, j - 1)[2]
-				+ img->at<Vec3f>(i, j + 1)[2]
-				- 4 * img->at<Vec3f>(i, j)[2];
+            if(img->channels() == 3){
+                gradient->at<Vec3f>(i, j)[0] = img->at<Vec3f>(i - 1, j)[0]
+                    + img->at<Vec3f>(i + 1, j)[0]
+                    + img->at<Vec3f>(i, j - 1)[0]
+                    + img->at<Vec3f>(i, j + 1)[0]
+                    - 4 * img->at<Vec3f>(i, j)[0];
+                gradient->at<Vec3f>(i, j)[1] = img->at<Vec3f>(i - 1, j)[1]
+                    + img->at<Vec3f>(i + 1, j)[1]
+                    + img->at<Vec3f>(i, j - 1)[1]
+                    + img->at<Vec3f>(i, j + 1)[1]
+                    - 4 * img->at<Vec3f>(i, j)[1];
+                gradient->at<Vec3f>(i, j)[2] = img->at<Vec3f>(i - 1, j)[2]
+                    + img->at<Vec3f>(i + 1, j)[2]
+                    + img->at<Vec3f>(i, j - 1)[2]
+                    + img->at<Vec3f>(i, j + 1)[2]
+                    - 4 * img->at<Vec3f>(i, j)[2];
+            }
+            else if(img->channels() == 1){
+                gradient->at<Vec3f>(i, j)[0] = img->at<uchar>(i - 1, j)
+                    + img->at<uchar>(i + 1, j)
+                    + img->at<uchar>(i, j - 1)
+                    + img->at<uchar>(i, j + 1)
+                    - 4 * img->at<uchar>(i, j);
+                gradient->at<Vec3f>(i, j)[1] = gradient->at<Vec3f>(i, j)[0];
+                gradient->at<Vec3f>(i, j)[2] = gradient->at<Vec3f>(i, j)[0];
+            }
 		}
 	}
+}
+
+void Poisson::cal_gradientX(Mat* img, Mat* gradientX)
+{
+    for (int i = 1; i < img->rows - 1; i++) {
+        for (int j = 1; j < img->cols - 1; j++) {
+            if(isMask && maskImg->at<float>(i,j)==0){
+                continue;
+            }
+            else
+            {
+                gradientX->at<Vec3f>(i, j)[0] = 0 * img->at<Vec3f>(i, j - 1)[0]
+                    + 1 * img->at<Vec3f>(i, j + 1)[0]
+                    - 1 * img->at<Vec3f>(i, j)[0];
+                gradientX->at<Vec3f>(i, j)[1] = 0 * img->at<Vec3f>(i, j - 1)[1]
+                    + 1 * img->at<Vec3f>(i, j + 1)[1]
+                    - 1 * img->at<Vec3f>(i, j)[1];
+                gradientX->at<Vec3f>(i, j)[2] = 0 * img->at<Vec3f>(i, j - 1)[2]
+                    + 1 * img->at<Vec3f>(i, j + 1)[2]
+                    - 1 * img->at<Vec3f>(i, j)[2];
+            }
+        }
+    }
+}
+
+void Poisson::cal_gradientY(Mat* img, Mat* gradientY)
+{
+    for (int i = 1; i < img->rows - 1; i++) {
+        for (int j = 1; j < img->cols - 1; j++) {
+            if(isMask && maskImg->at<float>(i,j)==0){
+                continue;
+            }
+            else{
+                gradientY->at<Vec3f>(i, j)[0] = 0 * img->at<Vec3f>(i - 1, j)[0]
+                    + 1 * img->at<Vec3f>(i + 1, j)[0]
+                    - 1 * img->at<Vec3f>(i, j)[0];
+                gradientY->at<Vec3f>(i, j)[1] = 0 * img->at<Vec3f>(i - 1, j)[1]
+                    + 1 * img->at<Vec3f>(i + 1, j)[1]
+                    - 1 * img->at<Vec3f>(i, j)[1];
+                gradientY->at<Vec3f>(i, j)[2] = 0 * img->at<Vec3f>(i - 1, j)[2]
+                    + 1 * img->at<Vec3f>(i + 1, j)[2]
+                    - 1 * img->at<Vec3f>(i, j)[2];
+            }
+        }
+    }
+}
+
+void Poisson::cal_LaplacianX(Mat* img, Mat* gradientX)
+{
+    for (int i = 1; i < img->rows; i++) {
+        for (int j = 1; j < img->cols; j++) {
+            if(isMask && maskImg->at<float>(i,j)==0){
+                continue;
+            }
+            else
+            {
+                gradientX->at<Vec3f>(i, j)[0] = -1 * img->at<Vec3f>(i, j - 1)[0]
+                    + 1 * img->at<Vec3f>(i, j)[0];
+                gradientX->at<Vec3f>(i, j)[1] = -1 * img->at<Vec3f>(i, j - 1)[1]
+                    + 1 * img->at<Vec3f>(i, j)[1];
+                gradientX->at<Vec3f>(i, j)[2] = -1 * img->at<Vec3f>(i, j - 1)[2]
+                    + 1 * img->at<Vec3f>(i, j)[2];
+            }
+        }
+    }
+}
+
+void Poisson::cal_LaplacianY(Mat* img, Mat* gradientY)
+{
+    for (int i = 1; i < img->rows; i++) {
+        for (int j = 1; j < img->cols; j++) {
+            if(isMask && maskImg->at<float>(i,j)==0){
+                continue;
+            }
+            else{
+                gradientY->at<Vec3f>(i, j)[0] = -1 * img->at<Vec3f>(i - 1, j)[0]
+                    + 1 * img->at<Vec3f>(i, j)[0];
+                gradientY->at<Vec3f>(i, j)[1] = -1 * img->at<Vec3f>(i - 1, j)[1]
+                    + 1 * img->at<Vec3f>(i, j)[1];
+                gradientY->at<Vec3f>(i, j)[2] = -1 * img->at<Vec3f>(i - 1, j)[2]
+                    + 1 * img->at<Vec3f>(i, j)[2];
+            }
+        }
+    }
+}
+
+void Poisson::run_mixed()
+{
+    tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+    cal_gradient(&tmp);
+    gradient->copyTo(*srcgradient);
+    cal_gradientX(&tmp,gradientX);
+    gradientX->copyTo(*srcgradientX);
+    cal_gradientY(&tmp,gradientY);
+    gradientY->copyTo(*srcgradientY);
+    cal_gradient(addImg);
+    cal_gradientX(addImg,gradientX);
+    cal_gradientY(addImg,gradientY);
+    Mat *newgradientX = new Mat(Size(width,height), CV_32FC3);
+    Mat *newgradientY = new Mat(Size(width,height), CV_32FC3);
+
+    for (int i = 0; i < tmp.rows; i++){
+        for (int j = 0; j < tmp.cols; j++){
+            float f0 = gradientX->at<Vec3f>(i,j)[0] - gradientY->at<Vec3f>(i,j)[0];
+            float f1 = gradientX->at<Vec3f>(i,j)[1] - gradientY->at<Vec3f>(i,j)[1];
+            float f2 = gradientX->at<Vec3f>(i,j)[2] - gradientY->at<Vec3f>(i,j)[2];
+            float g0 = srcgradientX->at<Vec3f>(i,j)[0] - srcgradientY->at<Vec3f>(i,j)[0];
+            float g1 = srcgradientX->at<Vec3f>(i,j)[1] - srcgradientY->at<Vec3f>(i,j)[1];
+            float g2 = srcgradientX->at<Vec3f>(i,j)[2] - srcgradientY->at<Vec3f>(i,j)[2];
+            if(isMask && maskImg->at<float>(i,j)==0){
+                continue;
+            }
+            else{
+                if (abs(f0) <= abs(g0))
+                {
+                    gradientX->at<Vec3f>(i,j)[0] = srcgradientX->at<Vec3f>(i,j)[0];
+                    gradientY->at<Vec3f>(i,j)[0] = srcgradientY->at<Vec3f>(i,j)[0];
+                }
+                if (abs(f1) <= abs(g1))
+                {
+                    gradientX->at<Vec3f>(i,j)[1] = srcgradientX->at<Vec3f>(i,j)[1];
+                    gradientY->at<Vec3f>(i,j)[1] = srcgradientY->at<Vec3f>(i,j)[1];
+                }
+                if (abs(f2) <= abs(g2))
+                {
+                    gradientX->at<Vec3f>(i,j)[2] = srcgradientX->at<Vec3f>(i,j)[2];
+                    gradientY->at<Vec3f>(i,j)[2] = srcgradientY->at<Vec3f>(i,j)[2];
+                }
+            }
+        }
+    }
+    cal_LaplacianX(gradientX,newgradientX);
+    cal_LaplacianY(gradientY,newgradientY);
+    *gradient = (*newgradientX) + (*newgradientY);
+
+    solve_poisson2();
+}
+
+void Poisson::run_gray()
+{
+    Mat *GraySrc = nullptr;
+    cvtColor(*addImg, *GraySrc, COLOR_BGR2GRAY);
+    cal_gradient(GraySrc);
+
+    tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+    solve_poisson1();
 }
 
 Mat* Poisson::run(Type type)
 {
 	srcImg->convertTo(*srcImg, CV_32F, 1.0f / 255);
+    qDebug("%d,%d\n",addImg->rows,addImg->cols);
 	if (addImg != nullptr) {
 		addImg->convertTo(*addImg, CV_32F, 1.0f / 255);
 		resize(*addImg, *addImg, Size(width, height));
@@ -472,8 +693,14 @@ Mat* Poisson::run(Type type)
 
 
 	gradient = new Mat(Size(width, height), CV_32FC3);
+    gradientX = new Mat(Size(width,height), CV_32FC3);
+    gradientY = new Mat(Size(width,height), CV_32FC3);
+    srcgradient = new Mat(Size(width,height), CV_32FC3);
+    srcgradientX = new Mat(Size(width,height), CV_32FC3);
+    srcgradientY = new Mat(Size(width,height), CV_32FC3);
 
 	if (type == NORMAL) {
+        qDebug()<<"111";
 		run_normal();
 	}
 	else if (type == GRADIENT) {
@@ -488,6 +715,12 @@ Mat* Poisson::run(Type type)
 	else if (type == LIGHT) {
 		run_light();
 	}
+    else if (type == GRAY){
+        run_gray();
+    }
+    else if (type == MIXED) {
+        run_mixed();
+    }
 	if (maskImg != nullptr) {
 		delete maskImg;
 	}

@@ -39,7 +39,7 @@ private:
     int inum; //表示封闭区域数量-1
 
     Mat srcImg;
-    Mat maskImg;
+    Mat maskImg;//和原图大小一样的掩码图
     int w; //实际变成的大小
     int h;
     Poisson* poisson;
@@ -52,8 +52,17 @@ private:
 public:
     int width;
     int height;
-    Mat fitsrc;
-    Mat fitmask;
+    int fitw; //用于记录切割后掩码图的原宽
+    int fith;
+    Mat fitsrc;//被割过的原图
+    Mat fitmask;//fitsrc对应的掩码图
+
+    Mat PutMask();
+    Mat PutSrc();
+    Mat PutFitSrc();
+    Mat PutFitMask();
+    void GetMask();
+    void GetMaskAndSrc(Mat src, Mat mask);
 
 protected:
     void paintEvent(QPaintEvent *); //绘制函数
@@ -65,7 +74,7 @@ private:
     Mat resizemat(Mat img); //适当调整图像大小
 
 public:
-    void start();
+    void start(int times, int x, int y, int w, int h, Type type);
     void open(QString filename);
     void clear();
     void finish();

@@ -25,6 +25,8 @@ backwindow::backwindow(QWidget* parent):QWidget(parent)
         timer->start(1000);
         qDebug()<<"timer start!";
     }
+    fitw = 0;
+    fith = 0;
 }
 
 backwindow::~backwindow()
@@ -90,6 +92,45 @@ Mat backwindow::resizemat(Mat img)
     return dst;
 }
 
+void backwindow::GetMask()
+{
+    if(flag){
+        //dstImg = srcImg.clone();
+        maskImg = Mat::zeros(srcImg.rows,srcImg.cols, CV_8UC1);
+        for(int i=0;i<=inum;i++){
+            drawContours(maskImg,co_ordinates, i, Scalar(255), CV_FILLED, 8 );
+        }
+        imshow("a",maskImg);
+    }
+
+}
+
+Mat backwindow::PutMask()
+{
+    return maskImg;
+}
+
+Mat backwindow::PutSrc()
+{
+    return srcImg;
+}
+
+Mat backwindow::PutFitSrc()
+{
+    return fitsrc;
+}
+
+Mat backwindow::PutFitMask()
+{
+    return fitmask;
+}
+
+void backwindow::GetMaskAndSrc(Mat src, Mat mask)
+{
+    fitsrc = src;
+    fitmask = mask;
+}
+
 void backwindow::clear()
 {
     inum = -1;
@@ -139,6 +180,8 @@ void backwindow::finish()
     if(ymax==h-1) ymax=h-2;
     fitmask=fitmask(Range(ymin-1,ymax+2),Range(xmin-1,xmax+2));
     fitsrc=fitsrc(Range(ymin-1,ymax+2),Range(xmin-1,xmax+2));
+    fitw = fitmask.cols;
+    fith = fitmask.rows;
     imshow("mask",fitsrc);
 }
 
@@ -176,14 +219,6 @@ void backwindow::mousePressEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::RightButton)
     {
-        if(flag){
-            //dstImg = srcImg.clone();
-            maskImg = Mat::zeros(srcImg.rows,srcImg.cols, CV_8UC1);
-            for(int i=0;i<=inum;i++){
-                drawContours(maskImg,co_ordinates, i, Scalar(255), CV_FILLED, 8 );
-            }
-            imshow("a",maskImg);
-        }
     }
 
     else if(e->button() == Qt::LeftButton)
@@ -246,12 +281,20 @@ void backwindow::mouseReleaseEvent(QMouseEvent *e)
     }
 }
 
-void backwindow::start(){
-    Mat src = imread("1.jpg");
+void backwindow::start(int times, int x, int y, int w, int h, Type type){
+    /*Mat src = imread("C:/Users/ThinkPad/Desktop/build-poisson-Desktop_Qt_5_7_0_MSVC2013_64bit-Release/release/1.jpg");
     qDebug()<<"sourcesize = "<<src.rows << " "<<src.cols;
     qDebug()<<"masksize = "<<maskImg.rows << " "<<maskImg.cols;
     poisson = new Poisson();
     poisson->set(&src,&srcImg,&maskImg,3000,100, 100, 100,60);
     Mat* ans = poisson->run(Type::NORMAL);
+    imshow("miao",*ans);*/
+    qDebug()<<"111";
+    poisson = new Poisson();
+    poisson->set(&srcImg, &fitsrc, &fitmask, times, x, y, w, h);
+    imshow("1",fitsrc);
+    qDebug()<<"222";
+    Mat *ans = poisson->run(type);
     imshow("miao",*ans);
+    //srcImg = *ans;
 }

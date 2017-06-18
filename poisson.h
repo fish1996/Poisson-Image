@@ -14,66 +14,84 @@ using namespace cv;
 class Poisson
 {
 private:
-	float PI;
-	Mat* gradient; //Ìİ¶È¾ØÕó
-	Mat* srcImg; //Ô­Í¼
-	Mat* addImg; //¼ÓÉÏµÄÍ¼
-	Mat* maskImg; //ÑÚÂëÍ¼
+    float PI;
+    Mat* gradient; //æ¢¯åº¦çŸ©é˜µ
+    Mat* gradientX; //æ¢¯åº¦çŸ©é˜µ(xæ–¹å‘ï¼‰
+    Mat* gradientY; //æ¢¯åº¦çŸ©é˜µï¼ˆyæ–¹å‘ï¼‰
+    Mat* srcImg; //åŸå›¾
+    Mat* addImg; //åŠ ä¸Šçš„å›¾
+    Mat* maskImg; //æ©ç å›¾
 
-	Mat* magnitude;
+    Mat* magnitude;
 
-	Mat tmp; //ÁÙÊ±Í¼£¬´æµÄĞÅÏ¢ÊÇROIÍ¼Ïñ£¨¸ĞĞËÈ¤ÇøÓò£©,¾ØĞÎ
+    Mat tmp; //ä¸´æ—¶å›¾ï¼Œå­˜çš„ä¿¡æ¯æ˜¯ROIå›¾åƒï¼ˆæ„Ÿå…´è¶£åŒºåŸŸï¼‰,çŸ©å½¢
+    Mat* srcgradient; //æ¢¯åº¦çŸ©é˜µ (åŸå›¾)
+    Mat* srcgradientX; //æ¢¯åº¦çŸ©é˜µ (åŸå›¾xæ–¹å‘)
+    Mat* srcgradientY; //æ¢¯åº¦çŸ©é˜µ (åŸå›¾yæ–¹å‘)
 
-	Color color;//ÑÕÉ«
+    Color color;//é¢œè‰²
 
-				//Ñ¡ÇøÎ»ÖÃ
-	int beginw;
-	int beginh;
-	int width;
-	int height;
+    float low;
+    float high;
+    int ksize; //çº¹ç†å¹³æ»‘çš„ç®—å­å¤§å°
+                //é€‰åŒºä½ç½®
+    int beginw;
+    int beginh;
+    int width;
+    int height;
 
-	float alpha;
-	float beta;
+    float alpha;
+    float beta;
 
-	int iterTimes;// iterTimesµü´ú´ÎÊı
-	int factor;
-	float max;
-	float min;
-	bool isMask;//ÊÇ·ñÓĞÑÚÂëÍ¼
-	Mat* mkTempCos(int m, int n);//ÓÅ»¯º¯Êı
-	void calculate(int i, int j);//Çó½â²´ËÉ·½³Ì
-	void subtract(int num, Mat* mat);//Êı×Ö¼õÈ¥¾ØÕó
-	float pow2(float x);
+    int iterTimes;// iterTimesè¿­ä»£æ¬¡æ•°
+    int factor;
+    float max;
+    float min;
+    bool isMask;//æ˜¯å¦æœ‰æ©ç å›¾
+    Mat* mkTempCos(int m, int n);//ä¼˜åŒ–å‡½æ•°
+    void calculate(int i, int j);//æ±‚è§£æ³Šæ¾æ–¹ç¨‹
+    void subtract(int num, Mat* mat);//æ•°å­—å‡å»çŸ©é˜µ
+    float pow2(float x);
 
-	void run_normal();
-	void run_gradient();
-	void run_color();
-	void run_texture();
-	void run_light();
+    void run_normal();
+    void run_gradient();
+    void run_color();
+    void run_texture();
+    void run_light();
+    void run_mixed();
 
-	void cal_light(float& g,float m);
-	void multi_light();
-	void multi_color();//ÑÕÉ«Í¨µÀ³Ë·¨
-	void cal_gradient(Mat* img);//Çóµ¼
-	void cal_magnitude();
-	void cal_magnitude(int i, int j, int k);
+    void cal_light(float& g,float m);
+    void multi_light();
+    void multi_color();//é¢œè‰²é€šé“ä¹˜æ³•
+    void canny_texture(Mat out); //cannyç®—å­è°ƒæ•´è¾¹ç¼˜
+    void cal_gradient(Mat* img);//æ±‚å¯¼
+    void cal_magnitude();
+    void cal_magnitude(int i, int j, int k);
 
-	void print(Mat* temp);//¾ØÕóÊä³ö
-	void solve_poisson1();//Çó½â²´ËÉ·½·¨1
-	void solve_poisson2();//Çó½â²´ËÉ·½·¨2
+    void cal_gradientX(Mat* img,Mat* gradientX);//æ±‚å¯¼
+    void cal_gradientY(Mat* img,Mat* gradientY);//æ±‚å¯¼
+    void cal_LaplacianX(Mat* img,Mat* gradientX);
+    void cal_LaplacianY(Mat* img,Mat* gradientY);
 
-	void init();
+    void print(Mat* temp);//çŸ©é˜µè¾“å‡º
+    void solve_poisson1();//æ±‚è§£æ³Šæ¾æ–¹æ³•1
+    void solve_poisson2();//æ±‚è§£æ³Šæ¾æ–¹æ³•2
+
+    void run_gray();
+
+    void init();
 
 public:
-	Poisson();
-	void set(Mat* src, Mat* mask, Color c, int times, int x, int y, int w, int h);
-	void set(Mat* src, Color c, int times, int x, int y, int w, int h);
-	void set(Mat* src, Mat* mask, float alpha, float beta, int times, int x, int y, int w, int h);
-	void set(Mat* src, float a, float b, int times, int x, int y, int w, int h);
-	void set(Mat* src, Mat* add, Mat* mask, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
-	void set(Mat* src, Mat* add, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
+    Poisson();//srcæ˜¯åŸå›¾ï¼Œaddå’Œmaskéƒ½æ˜¯å¤„ç†åå¾—åˆ°çš„
+    void set(Mat* src, Mat* mask, Color c, int times, int x, int y, int w, int h);
+    void set(Mat* src, Color c, int times, int x, int y, int w, int h);
+    void set(Mat* src, Mat* mask, float alpha, float beta, int times, int x, int y, int w, int h);
+    void set(Mat* src, float a, float b, int times, int x, int y, int w, int h);
+    void set(Mat* src, Mat* add, Mat* mask, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
+    void set(Mat* src, Mat* add, int times, int x, int y, int w, int h, float min = 0, float max = 1, int factor = 10);
+    void set(Mat* src, Mat* mask, float lt, float ht, int size, int times, int x, int y, int w, int h);
 
-	Mat* run(Type type);
+    Mat* run(Type type);
 
 };
 #endif

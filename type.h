@@ -8,6 +8,8 @@ enum Type {
 	TEXTURE,
 	COLOR,
 	LIGHT,
+    GRAY,
+    MIXED,
 };
 
 #endif // TYPE_H
