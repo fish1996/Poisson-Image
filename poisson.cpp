@@ -8,6 +8,8 @@ Poisson::Poisson()
 
 void Poisson::init()
 {
+    gradientX = nullptr;
+    gradientY = nullptr;
     srcImg = nullptr;
     addImg = nullptr;
     maskImg = nullptr;
@@ -742,6 +744,12 @@ Mat* Poisson::run(Type type)
     }
     if (magnitude != nullptr) {
         delete magnitude;
+    }
+    if (gradientX != nullptr) {
+        delete gradientX;
+    }
+    if (gradientY != nullptr) {
+        delete gradientY;
     }
     delete gradient;
     return srcImg;
