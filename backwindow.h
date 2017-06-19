@@ -59,10 +59,15 @@ public:
     Mat fitsrc;//被割过的原图
     Mat fitmask;//fitsrc对应的掩码图
 
+    Mat *alphaimg; //用于图像边缘透明
+
+    void createAlphaMat(Mat *mat);
+
     Mat PutMask();
     Mat PutSrc();
     Mat PutFitSrc();
     Mat PutFitMask();
+    Mat PutFitALP();
     void GetMask();
     void GetMaskAndSrc(Mat src, Mat mask);
     void GetChoose(int choose);

@@ -44,12 +44,22 @@ void ChooseImg::GetImg(Mat fitImg)
                      rgb.cols,rgb.rows,
                      rgb.cols*rgb.channels(),   //new add
                      QImage::Format_RGB888);
-    }else                     // gray image
+    }
+    else if(fitImg.channels() == 1)                       // gray image
     {
         img = QImage((const uchar*)(fitImg.data),
                      fitImg.cols,fitImg.rows,
                      fitImg.cols*fitImg.channels(),    //new add
                      QImage::Format_Indexed8);
+    }
+    else if(fitImg.channels() == 4)    // RGB image
+    {
+        //cvtColor(fitImg,rgb,CV_BGR2RGB);
+        rgb=fitImg.clone();
+        img = QImage((const uchar*)(rgb.data),  //(const unsigned char*)
+                     rgb.cols,rgb.rows,
+                     rgb.cols*rgb.channels(),   //new add
+                     QImage::Format_ARGB32);
     }
 
     w = img.width();

@@ -29,12 +29,14 @@ backwindow::backwindow(QWidget* parent):QWidget(parent)
     fitw = 0;
     fith = 0;
     choosenum = 0;
+    alphaimg = nullptr;
 }
 
 backwindow::~backwindow()
 {
     timer->stop();
     delete timer;
+    delete alphaimg;
 }
 
 void backwindow::open(QString filename)
@@ -122,6 +124,11 @@ Mat backwindow::PutFitSrc()
     return fitsrc;
 }
 
+Mat backwindow::PutFitALP()
+{
+    return *alphaimg;
+}
+
 Mat backwindow::PutFitMask()
 {
     return fitmask;
@@ -185,6 +192,9 @@ void backwindow::finish()
     fitw = fitmask.cols;
     fith = fitmask.rows;
     imshow("mask",fitsrc);
+
+    alphaimg = new Mat(fitsrc.size(),CV_8UC4);
+    createAlphaMat(alphaimg);
 }
 
 void backwindow::paintEvent(QPaintEvent *e)
@@ -314,6 +324,21 @@ void backwindow::ChangeSize(int sw, int sh)
 {
     cv::resize(fitmask, fitmask, Size(), (sw*1.0/fitw), (sh*1.0/fith));
     cv::resize(fitsrc, fitsrc, Size(), (sw*1.0/fitw), (sh*1.0/fith));
+}
+
+void backwindow::createAlphaMat(Mat *png)
+{
+    for(int i=0;i<fitmask.rows;i++)
+    {
+        for(int j=0;j<fitmask.cols;j++)
+        {
+            Vec4b& rgba = png->at<Vec4b>(i, j);
+            rgba[0] = fitsrc.at<Vec3b>(i,j)[0];
+            rgba[1] = fitsrc.at<Vec3b>(i,j)[1];
+            rgba[2] = fitsrc.at<Vec3b>(i,j)[2];
+            rgba[3] = fitmask.at<uchar>(i,j);
+        }
+    }
 }
 
 void backwindow::start(int times, int x, int y, int w, int h, Type type){

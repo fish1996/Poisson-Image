@@ -274,7 +274,7 @@ void MyMenu::PushChooseButton()
 {
     mainpara->scr->GetMask();
     mainpara->scr->finish();
-    mainpara->chooseimg->GetImg(mainpara->scr->PutFitSrc());
+    mainpara->chooseimg->GetImg(mainpara->scr->PutFitALP());
     mainpara->chooseimg->setVisible(true);
     mainpara->chooseimg->CanMoveImg();
 }
