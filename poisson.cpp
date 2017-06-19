@@ -1,5 +1,6 @@
 ﻿#include "poisson.h"
 #include <iostream>
+#include <QDebug>
 
 Poisson::Poisson()
 {
@@ -213,6 +214,7 @@ void Poisson::set(Mat* src, Mat* add, Mat* mask, int times, int x, int y, int w,
     min = mi;
     max = ma;
     factor = fa;
+    qDebug()<<"set";
 }
 
 void Poisson::set(Mat* src, float a, float b, int times, int x, int y, int w, int h)
@@ -478,9 +480,13 @@ void Poisson::run_light()
 {
     Mat *newgradientX = new Mat(Size(width, height), CV_32FC3);
     Mat *newgradientY = new Mat(Size(width, height), CV_32FC3);
+    gradientX = new Mat(Size(width, height), CV_32FC3);
+    gradientY = new Mat(Size(width, height), CV_32FC3);
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+
     cal_gradientX(&tmp, gradientX);
     cal_gradientY(&tmp, gradientY);
+
     cal_magnitude();
     multi_light();
 
@@ -644,12 +650,13 @@ void Poisson::cal_LaplacianY(Mat* img, Mat* gradientY)
 
 void Poisson::run_mixed()
 {
+    qDebug()<<"run_mix";
     srcgradient = new Mat(Size(width, height), CV_32FC3);
     srcgradientX = new Mat(Size(width, height), CV_32FC3);
     srcgradientY = new Mat(Size(width, height), CV_32FC3);
     gradientX = new Mat(Size(width, height), CV_32FC3);
     gradientY = new Mat(Size(width, height), CV_32FC3);
-
+    qDebug()<<"run_mix1";
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
     cal_gradient(&tmp);
     gradient->copyTo(*srcgradient);
@@ -662,7 +669,7 @@ void Poisson::run_mixed()
     cal_gradientY(addImg, gradientY);
     Mat *newgradientX = new Mat(Size(width, height), CV_32FC3);
     Mat *newgradientY = new Mat(Size(width, height), CV_32FC3);
-
+    qDebug()<<"run_mix2";
     for (int i = 0; i < tmp.rows; i++){
         for (int j = 0; j < tmp.cols; j++){
             float f0 = gradientX->at<Vec3f>(i, j)[0] - gradientY->at<Vec3f>(i, j)[0];
@@ -696,16 +703,21 @@ void Poisson::run_mixed()
     cal_LaplacianX(gradientX, newgradientX);
     cal_LaplacianY(gradientY, newgradientY);
     *gradient = (*newgradientX) + (*newgradientY);
-
+    qDebug()<<"run_mix3";
     solve_poisson2();
     delete newgradientX;
     delete newgradientY;
+    qDebug()<<"run_mix4";
 }
 
 void Poisson::run_gray()
 {
-    Mat *GraySrc = nullptr;
+    Mat *GraySrc = new Mat();
+    *GraySrc = addImg->clone();
+    qDebug()<<"start";
     cvtColor(*addImg, *GraySrc, COLOR_BGR2GRAY);
+    qDebug()<<"ra";
+    imshow("r",*GraySrc);
     cal_gradient(GraySrc);
 
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
@@ -729,7 +741,6 @@ Mat* Poisson::run(Type type)
     gradient = new Mat(Size(width, height), CV_32FC3);
 
     if (type == NORMAL) {
-
         run_normal();
     }
     else if (type == GRADIENT) {
@@ -745,6 +756,7 @@ Mat* Poisson::run(Type type)
         run_light();
     }
     else if (type == GRAY){
+        qDebug()<<"run_gray";
         run_gray();
     }
     else if (type == MIXED) {
@@ -766,13 +778,13 @@ Mat* Poisson::run(Type type)
         delete gradientY;
     }
     if (srcgradientX != nullptr) {
-        delete gradientX;
+        delete srcgradientX;
     }
     if (srcgradientY != nullptr) {
-        delete gradientY;
+        delete srcgradientY;
     }
     if (srcgradient != nullptr) {
-        delete gradientX;
+        delete srcgradient;
     }
     delete gradient;
     return srcImg;

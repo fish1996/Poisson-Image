@@ -341,7 +341,7 @@ void backwindow::createAlphaMat(Mat *png)
     }
 }
 
-void backwindow::start(int times, int x, int y, int w, int h, Type type){
+void backwindow::start(Type type){
     /*Mat src = imread("C:/Users/ThinkPad/Desktop/build-poisson-Desktop_Qt_5_7_0_MSVC2013_64bit-Release/release/1.jpg");
     qDebug()<<"sourcesize = "<<src.rows << " "<<src.cols;
     qDebug()<<"masksize = "<<maskImg.rows << " "<<maskImg.cols;
@@ -349,11 +349,12 @@ void backwindow::start(int times, int x, int y, int w, int h, Type type){
     poisson->set(&src,&srcImg,&maskImg,3000,100, 100, 100,60);
     Mat* ans = poisson->run(Type::NORMAL);
     imshow("miao",*ans);*/
-    qDebug()<<"111";
-    poisson = new Poisson();
-    poisson->set(&srcImg, &fitsrc, &fitmask, times, x, y, w, h);
+    /*poisson = new Poisson();
+    poisson->set(&srcImg, &fitsrc, &fitmask, times, x, y, w, h);*/
     imshow("1",fitsrc);
-    qDebug()<<"222";
+    //imshow("2",fitmask);
+    //imshow("3",srcImg);
+    qDebug()<<"fit";
     Mat *ans = poisson->run(type);
     imshow("miao",*ans);
     //srcImg = *ans;

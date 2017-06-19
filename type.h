@@ -10,6 +10,8 @@ enum Type {
 	LIGHT,
     GRAY,
     MIXED,
+    SPLICING,
+    OPTIMISED,
 };
 
 #endif // TYPE_H

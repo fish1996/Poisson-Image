@@ -38,11 +38,8 @@ private:
     bool flags; //是否完成绘制
     int inum; //表示封闭区域数量-1
 
-    Mat srcImg;
-    Mat maskImg;//和原图大小一样的掩码图
     int w; //实际变成的大小
     int h;
-    Poisson* poisson;
     Point pt_origin;
     Point pt_Cur;
     vector< vector<Point>>  co_ordinates;
@@ -58,8 +55,12 @@ public:
     int fith;
     Mat fitsrc;//被割过的原图
     Mat fitmask;//fitsrc对应的掩码图
+    Mat srcImg;
+    Mat maskImg;//和原图大小一样的掩码图
 
     Mat *alphaimg; //用于图像边缘透明
+
+    Poisson* poisson;
 
     void createAlphaMat(Mat *mat);
 
@@ -83,7 +84,7 @@ private:
     Mat resizemat(Mat img); //适当调整图像大小
 
 public:
-    void start(int times, int x, int y, int w, int h, Type type);
+    void start(Type type);
     void open(QString filename);
     void clear();
     void finish();

@@ -2,14 +2,20 @@
 
 para::para()
 {
-    this->oper = 0;
+    this->type = NORMAL;
     this->choosenum = 0;
     this->iteration = 1000;
     this->hscaling = 1;
     this->vscaling = 1;
-    this->min = 0;
-    this->max = 1;
+    this->min = 5;
+    this->max = 200;
     this->factor = 10;
+    this->R = 0;
+    this->G = 0;
+    this->B = 0;
+    this->ope = 3;
+    this->alpha = 0.2;
+    this->beta = 0.4;
 
     this->scr = new backwindow;
     this->dst = new backwindow;
@@ -23,9 +29,9 @@ para::para()
 
 para::~para(){}
 
-void para::updataPara(int oper, int choosenum, int iteration, float hscaling, float vscaling, int min, int max, int factor)
+void para::updataPara(Type type, int choosenum, int iteration, float hscaling, float vscaling, int min, int max, int factor)
 {
-    this->oper = oper;
+    this->type = type;
     this->choosenum = choosenum;
     this->iteration = iteration;
     this->hscaling = hscaling;
@@ -37,9 +43,9 @@ void para::updataPara(int oper, int choosenum, int iteration, float hscaling, fl
     return;
 }
 
-void para::updataOper(int oper)
+void para::updataType(Type type)
 {
-    this->oper = oper;
+    this->type = type;
 
     return;
 }
@@ -93,13 +99,57 @@ void para::startPossion(int times, Type type)
 {
     this->scr->ChangeSize(chooseimg->sw, chooseimg->sh);
     this->PassMaskAndSrc();
-    //qDebug("w&h:%d,%d\n", chooseimg->w, chooseimg->h);
-    this->dst->start(times, chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h,type);
+    qDebug("w&h:%d,%d\n", dst->fitsrc.rows, dst->fitsrc.cols);
+    this->dst->poisson = new Poisson();
+    if(type == NORMAL){
+        this->dst->poisson->set(&dst->srcImg, &dst->fitsrc, &dst->fitmask, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == GRAY){
+        qDebug()<<"gray";
+        this->dst->poisson->set(&dst->srcImg, &dst->fitsrc, &dst->fitmask, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == MIXED){
+        qDebug()<<"MIXED";
+        this->dst->poisson->set(&dst->srcImg, &dst->fitsrc, &dst->fitmask, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == TEXTURE){
+        this->dst->srcImg = this->scr->srcImg;
+        this->dst->maskImg = this->scr->maskImg;
+        this->dst->poisson->set(&dst->srcImg, &dst->maskImg, (float)min, (float)max, ope, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == LIGHT){
+        this->dst->srcImg = this->scr->srcImg;
+        this->dst->maskImg = this->scr->maskImg;
+        this->dst->poisson->set(&dst->srcImg, &dst->maskImg, alpha, beta, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == COLOR){
+        this->dst->srcImg = this->scr->srcImg;
+        this->dst->maskImg = this->scr->maskImg;
+        this->dst->poisson->set(&dst->srcImg, &dst->maskImg, Color(R, G, B), times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == OPTIMISED){
+        qDebug()<<"OPTIMISED";
+        this->dst->poisson->set(&dst->srcImg, &dst->fitsrc, &dst->fitmask, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+    }
+    else if(type == SPLICING){
+        //
+    }
+    else
+        return;
+    //this->dst->poisson->set(dst->srcImg, dst->fitsrc, dst->fitmask, times, x, y, w, h);
+    this->dst->start(type);
 }
 
-int para::GetOper()
+Type para::GetType()
 {
-    return this->oper;
+    return this->type;
 }
 
 int para::GetChoose()

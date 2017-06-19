@@ -42,6 +42,30 @@ void MyMenu::createAction()
 
    SavePhotoAction = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("保存图像"), this);
    connect(SavePhotoAction, SIGNAL(triggered()), this, SLOT(SavePhotoActionSlot()));
+
+   SeamlessCloning = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("无缝克隆"), this);
+   connect(SeamlessCloning, SIGNAL(triggered()), this, SLOT(SeamlessCloningSlot()));
+
+   OptimisedCloning = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("优化无缝"), this);
+   connect(OptimisedCloning, SIGNAL(triggered()), this, SLOT(OptimisedCloningSlot()));
+
+   GradientMixing = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("梯度混合"), this);
+   connect(GradientMixing, SIGNAL(triggered()), this, SLOT(GradientMixingSlot()));
+
+   TextureSmoothing = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("纹理平滑"), this);
+   connect(TextureSmoothing, SIGNAL(triggered()), this, SLOT(TextureSmoothingSlot()));
+
+   LightingChange = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("光照改变"), this);
+   connect(LightingChange, SIGNAL(triggered()), this, SLOT(LightingChangeSlot()));
+
+   ColorChange = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("颜色改变"), this);
+   connect(ColorChange, SIGNAL(triggered()), this, SLOT(ColorChangeSlot()));
+
+   IntensityChange = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("强度改变"), this);
+   connect(IntensityChange, SIGNAL(triggered()), this, SLOT(IntensityChangeSlot()));
+
+   SeamlessSplicing = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("无缝拼接"), this);
+   connect(SeamlessSplicing, SIGNAL(triggered()), this, SLOT(SeamlessSplicingSlot()));
 }
 void MyMenu::createMenu()
 {
@@ -55,6 +79,16 @@ void MyMenu::createMenu()
    file->addAction(ChooseSrcAction);
    file->addAction(ChooseDstAction);
    file->addAction(SavePhotoAction);
+
+   ope = this->menuBar()->addMenu(QStringLiteral("操作"));
+   ope->addAction(SeamlessCloning);
+   ope->addAction(GradientMixing);
+   ope->addAction(TextureSmoothing);
+   ope->addAction(LightingChange);
+   ope->addAction(ColorChange);
+   ope->addAction(OptimisedCloning);
+   ope->addAction(IntensityChange);
+   ope->addAction(SeamlessSplicing);
 }
 
 void MyMenu::createContentMenu()
@@ -68,22 +102,9 @@ void MyMenu::createContentMenu()
 
 void MyMenu::createButtons()
 {
-    SeamlessCloning = new QRadioButton(QStringLiteral("无缝克隆"));
-    GradientMixing = new QRadioButton(QStringLiteral("梯度混合"));
-    TextureSmoothing = new QRadioButton(QStringLiteral("纹理平滑"));
-    LightingChange = new QRadioButton(QStringLiteral("光照改变"));
-    ColorChange = new QRadioButton(QStringLiteral("颜色改变"));
-
-    operatingGroup = new QButtonGroup;
-    operatingGroup->addButton(SeamlessCloning,0);
-    operatingGroup->addButton(GradientMixing,1);
-    operatingGroup->addButton(TextureSmoothing,2);
-    operatingGroup->addButton(LightingChange,3);
-    operatingGroup->addButton(ColorChange,4);
-    connect(operatingGroup, SIGNAL(buttonClicked (int)), this, SLOT(operatingJudge(int)) );
-
     RectangleChoose = new QRadioButton(QStringLiteral("矩形"));
     PersonChoose = new QRadioButton(QStringLiteral("自由"));
+    RectangleChoose->setChecked(true);
 
     ChooseGroup = new QButtonGroup;
     ChooseGroup->addButton(RectangleChoose,0);
@@ -105,6 +126,72 @@ void MyMenu::createButtons()
     Vscaling->setValue(200);
     connect(Vscaling, SIGNAL(valueChanged(int)), this, SLOT(VscalingJudge(int)));
 
+    MinT = new QSlider(Qt::Horizontal);
+    MinT->setRange(0,150);
+    MinT->setValue(5);
+    MinTBox = new QSpinBox;
+    MinTBox->setRange(0,150);
+    MinTBox->setValue(5);
+    connect(MinT, SIGNAL(valueChanged(int)), this, SLOT(MinTJudge(int)));
+    connect(MinT, SIGNAL(valueChanged(int)),MinTBox, SLOT(setValue(int)));
+    connect(MinTBox, SIGNAL(valueChanged(int)),MinT, SLOT(setValue(int)));
+
+    MaxT = new QSlider(Qt::Horizontal);
+    MaxT->setRange(150,500);
+    MaxT->setValue(200);
+    MaxTBox = new QSpinBox;
+    MaxTBox->setRange(150,500);
+    MaxTBox->setValue(200);
+    connect(MaxT, SIGNAL(valueChanged(int)), this, SLOT(MaxTJudge(int)));
+    connect(MaxT, SIGNAL(valueChanged(int)),MaxTBox, SLOT(setValue(int)));
+    connect(MaxTBox, SIGNAL(valueChanged(int)),MaxT, SLOT(setValue(int)));
+
+    Operator3 = new QRadioButton("3");
+    Operator5 = new QRadioButton("5");
+    Operator7 = new QRadioButton("7");
+    Operator3->setChecked(true);
+
+    OperatorGroup = new QButtonGroup;
+    OperatorGroup->addButton(Operator3,3);
+    OperatorGroup->addButton(Operator5,5);
+    OperatorGroup->addButton(Operator7,7);
+    connect(ChooseGroup, SIGNAL(buttonClicked(int)), this, SLOT(OperatorJudge(int)));
+
+    alphaL = new QSlider(Qt::Horizontal);
+    alphaL->setRange(0,20);
+    alphaL->setValue(2);
+    ALBox = new QSpinBox;
+    ALBox->setRange(0,20);
+    ALBox->setValue(2);
+    connect(alphaL, SIGNAL(valueChanged(int)), this, SLOT(alphaLJudge(int)));
+    connect(alphaL, SIGNAL(valueChanged(int)),ALBox, SLOT(setValue(int)));
+    connect(ALBox, SIGNAL(valueChanged(int)),alphaL, SLOT(setValue(int)));
+
+    bateL = new QSlider(Qt::Horizontal);
+    bateL->setRange(0,20);
+    bateL->setValue(4);
+    BLBox = new QSpinBox;
+    BLBox->setRange(0,20);
+    BLBox->setValue(4);
+    connect(bateL, SIGNAL(valueChanged(int)), this, SLOT(bateLJudge(int)));
+    connect(bateL, SIGNAL(valueChanged(int)),BLBox, SLOT(setValue(int)));
+    connect(BLBox, SIGNAL(valueChanged(int)),bateL, SLOT(setValue(int)));
+
+    RedC = new QSpinBox;
+    RedC->setRange(0,255);
+    RedC->setValue(0);
+    connect(RedC, SIGNAL(valueChanged(int)), this, SLOT(RJudge(int)));
+
+    GreenC = new QSpinBox;
+    GreenC->setRange(0,255);
+    GreenC->setValue(0);
+    connect(GreenC, SIGNAL(valueChanged(int)), this, SLOT(GJudge(int)));
+
+    BlueC = new QSpinBox;
+    BlueC->setRange(0,255);
+    BlueC->setValue(0);
+    connect(RedC, SIGNAL(valueChanged(int)), this, SLOT(BJudge(int)));
+
     ChooseMark = new QPushButton(QStringLiteral("选择"));
     ReChoose = new QPushButton(QStringLiteral("重画"));
     StartPossion = new QPushButton(QStringLiteral("开始"));
@@ -115,16 +202,25 @@ void MyMenu::createButtons()
 
 void MyMenu::drawButtons()
 {
-    QLabel *RadLabel = new QLabel;
-    RadLabel->setText(QStringLiteral("选择操作"));
+    Type tempT = mainpara->GetType();
 
-    QVBoxLayout *RadButton = new QVBoxLayout;
-    RadButton->addWidget(RadLabel);
-    RadButton->addWidget(SeamlessCloning);
-    RadButton->addWidget(GradientMixing);
-    RadButton->addWidget(TextureSmoothing);
-    RadButton->addWidget(LightingChange);
-    RadButton->addWidget(ColorChange);
+    QLabel *RadLabel = new QLabel;
+    if(tempT == NORMAL)
+        RadLabel->setText(QStringLiteral("无缝克隆"));
+    else if(tempT == MIXED)
+        RadLabel->setText(QStringLiteral("梯度混合"));
+    else if(tempT == TEXTURE)
+        RadLabel->setText(QStringLiteral("纹理平滑"));
+    else if(tempT == COLOR)
+        RadLabel->setText(QStringLiteral("颜色改变"));
+    else if(tempT == LIGHT)
+        RadLabel->setText(QStringLiteral("光照改变"));
+    else if(tempT == GRAY)
+        RadLabel->setText(QStringLiteral("强度改变"));
+    else if(tempT == OPTIMISED)
+        RadLabel->setText(QStringLiteral("优化无缝"));
+    else if(tempT == SPLICING)
+        RadLabel->setText(QStringLiteral("无缝拼接"));
 
     QLabel *IteraLabel = new QLabel;
     IteraLabel->setText(QStringLiteral("迭代次数"));
@@ -150,7 +246,7 @@ void MyMenu::drawButtons()
     QHBoxLayout *HSLayout = new QHBoxLayout;
     HSLayout->addWidget(HSLabel);
     HSLayout->addWidget(Hscaling);
-
+    qDebug()<<"test";
     QLabel *VSLabel = new QLabel;
     VSLabel->setText(QStringLiteral("纵向缩放"));
 
@@ -167,14 +263,118 @@ void MyMenu::drawButtons()
     ButtonLayout->addWidget(ReChoose);
     ButtonLayout->addWidget(StartPossion);
 
+    QLabel *MinLabel = new QLabel;
+    MinLabel->setText(QStringLiteral("最小阈值"));
+
+    QHBoxLayout *MinLayout = new QHBoxLayout;
+    MinLayout->addWidget(MinLabel);
+    MinLayout->addWidget(MinT);
+    MinLayout->addWidget(MinTBox);
+
+    QLabel *MaxLabel = new QLabel;
+    MaxLabel->setText(QStringLiteral("最大阈值"));
+
+    QHBoxLayout *MaxLayout = new QHBoxLayout;
+    MaxLayout->addWidget(MaxLabel);
+    MaxLayout->addWidget(MaxT);
+    MaxLayout->addWidget(MaxTBox);
+
+    QVBoxLayout *ThresLayout = new QVBoxLayout;
+    ThresLayout->addLayout(MinLayout);
+    ThresLayout->addLayout(MaxLayout);
+
+    QLabel *OperatorLabel = new QLabel;
+    OperatorLabel->setText(QStringLiteral("算子大小"));
+
+    QHBoxLayout *OperatorButton = new QHBoxLayout;
+    OperatorButton->addWidget(Operator3);
+    OperatorButton->addWidget(Operator5);
+    OperatorButton->addWidget(Operator7);
+
+    QVBoxLayout *OperatorLayout = new QVBoxLayout;
+    OperatorLayout->addWidget(OperatorLabel);
+    OperatorLayout->addLayout(OperatorButton);
+
+    QLabel *AlphaLabel = new QLabel;
+    AlphaLabel->setText(QStringLiteral("透明度"));
+
+    QHBoxLayout *AlphaLayout = new QHBoxLayout;
+    AlphaLayout->addWidget(AlphaLabel);
+    AlphaLayout->addWidget(alphaL);
+    AlphaLayout->addWidget(ALBox);
+
+    QLabel *BateLabel = new QLabel;
+    BateLabel->setText(QStringLiteral("软化"));
+
+    QHBoxLayout *BateLayout = new QHBoxLayout;
+    BateLayout->addWidget(BateLabel);
+    BateLayout->addWidget(bateL);
+    BateLayout->addWidget(BLBox);
+
+    QVBoxLayout *LightLayout = new QVBoxLayout;
+    LightLayout->addLayout(AlphaLayout);
+    LightLayout->addLayout(BateLayout);
+
+    QLabel *ColorLabel = new QLabel;
+    ColorLabel->setText(QStringLiteral("调整颜色"));
+
+    QLabel *RedLabel = new QLabel;
+    RedLabel->setText("R");
+
+    QHBoxLayout *RedLayout = new QHBoxLayout;
+    RedLayout->addWidget(RedLabel);
+    RedLayout->addWidget(RedC);
+
+    QLabel *GreenLabel = new QLabel;
+    GreenLabel->setText("G");
+
+    QHBoxLayout *GreenLayout = new QHBoxLayout;
+    GreenLayout->addWidget(GreenLabel);
+    GreenLayout->addWidget(GreenC);
+
+    QLabel *BlueLabel = new QLabel;
+    BlueLabel->setText("B");
+
+    QHBoxLayout *BlueLayout = new QHBoxLayout;
+    BlueLayout->addWidget(BlueLabel);
+    BlueLayout->addWidget(BlueC);
+
+    QVBoxLayout *ColorLayout = new QVBoxLayout;
+    ColorLayout->addWidget(ColorLabel);
+    ColorLayout->addLayout(RedLayout);
+    ColorLayout->addLayout(GreenLayout);
+    ColorLayout->addLayout(BlueLayout);
+
     QVBoxLayout *ControlLayout = new QVBoxLayout;
-    ControlLayout->addLayout(RadButton);
+    ControlLayout->addWidget(RadLabel);
     ControlLayout->addStretch();
     ControlLayout->addLayout(ChooseLayout);
     ControlLayout->addStretch();
     ControlLayout->addLayout(Itera);
-    ControlLayout->addStretch();
-    ControlLayout->addLayout(Slider);
+    if(tempT == NORMAL || tempT == OPTIMISED || tempT == GRAY){
+        ControlLayout->addStretch();
+        ControlLayout->addLayout(Slider);
+    }
+    else if(tempT == MIXED){
+        //RadLabel->setText(QStringLiteral("梯度混合"));
+    }
+    else if(tempT == TEXTURE){
+        ControlLayout->addStretch();
+        ControlLayout->addLayout(ThresLayout);
+        ControlLayout->addStretch();
+        ControlLayout->addLayout(OperatorLayout);
+    }
+    else if(tempT == COLOR){
+        ControlLayout->addStretch();
+        ControlLayout->addLayout(ColorLayout);
+    }
+    else if(tempT == LIGHT){
+        ControlLayout->addStretch();
+        ControlLayout->addLayout(LightLayout);
+    }
+    else if(tempT == SPLICING){
+        //RadLabel->setText(QStringLiteral("无缝拼接"));
+    }
     ControlLayout->addStretch();
     ControlLayout->addLayout(ButtonLayout);
     ControlLayout->addStretch();
@@ -243,9 +443,71 @@ void MyMenu::SavePhotoActionSlot()
      QMessageBox::warning(this, QStringLiteral("提示"), QStringLiteral("你点击了~保存文件~菜单"), QMessageBox::Yes | QMessageBox::No);
 }
 
-void MyMenu::operatingJudge(int opeID)
+void MyMenu::SeamlessCloningSlot()
 {
-    mainpara->updataOper(opeID);
+    if(mainpara->GetType() != NORMAL){
+        mainpara->updataType(NORMAL);
+        if(mainpara->GetType() != OPTIMISED && mainpara->GetType() != GRAY)
+            drawButtons();
+    }
+}
+
+void MyMenu::GradientMixingSlot()
+{
+    if(mainpara->GetType() != MIXED){
+        mainpara->updataType(MIXED);
+        drawButtons();
+    }
+}
+
+void MyMenu::TextureSmoothingSlot()
+{
+    if(mainpara->GetType() != TEXTURE){
+        mainpara->updataType(TEXTURE);
+        drawButtons();
+    }
+}
+
+void MyMenu::LightingChangeSlot()
+{
+    if(mainpara->GetType() != LIGHT){
+        mainpara->updataType(LIGHT);
+        drawButtons();
+    }
+}
+
+void MyMenu::ColorChangeSlot()
+{
+    if(mainpara->GetType() != COLOR){
+        mainpara->updataType(COLOR);
+        drawButtons();
+    }
+}
+
+void MyMenu::OptimisedCloningSlot()
+{
+    if(mainpara->GetType() != OPTIMISED){
+        mainpara->updataType(OPTIMISED);
+        if(mainpara->GetType() != NORMAL && mainpara->GetType() != NORMAL)
+            drawButtons();
+    }
+}
+
+void MyMenu::IntensityChangeSlot()
+{
+    if(mainpara->GetType() != GRAY){
+        mainpara->updataType(GRAY);
+        if(mainpara->GetType() != OPTIMISED && mainpara->GetType() != NORMAL)
+            drawButtons();
+    }
+}
+
+void MyMenu::SeamlessSplicingSlot()
+{
+    if(mainpara->GetType() != SPLICING){
+        mainpara->updataType(SPLICING);
+        drawButtons();
+    }
 }
 
 void MyMenu::ChooseJudge(int chooseID)
@@ -270,6 +532,66 @@ void MyMenu::VscalingJudge(int vs)
     mainpara->chooseimg->ChangeH(mainpara->GetVscaling());
 }
 
+void MyMenu::MinTJudge(int min)
+{
+    mainpara->min = min;
+}
+
+void MyMenu::MaxTJudge(int max)
+{
+    mainpara->max = max;
+}
+
+void MyMenu::MinTBoxJudge(int min)
+{
+    mainpara->min = min;
+}
+
+void MyMenu::MaxTBoxJudge(int max)
+{
+    mainpara->max = max;
+}
+
+void MyMenu::OperatorJudge(int ope)
+{
+    mainpara->ope = ope;
+}
+
+void MyMenu::alphaLJudge(int alpha)
+{
+    mainpara->alpha = alpha / 10.0;
+}
+
+void MyMenu::bateLJudge(int bate)
+{
+    mainpara->beta = bate / 10.0;
+}
+
+void MyMenu::ALBoxJudge(int alpha)
+{
+    mainpara->alpha = alpha / 10.0;
+}
+
+void MyMenu::BLBoxJudge(int bate)
+{
+    mainpara->beta = bate / 10.0;
+}
+
+void MyMenu::RJudge(int R)
+{
+    mainpara->R = R;
+}
+
+void MyMenu::GJudge(int G)
+{
+    mainpara->G = G;
+}
+
+void MyMenu::BJudge(int B)
+{
+    mainpara->B = B;
+}
+
 void MyMenu::PushChooseButton()
 {
     mainpara->scr->GetMask();
@@ -289,7 +611,7 @@ void MyMenu::PushReButton()
 
 void MyMenu::PushStartButton()
 {
-    Type type;
+    /*Type type;
     switch (mainpara->GetOper()) {
     case 0:
         type = NORMAL;
@@ -308,7 +630,7 @@ void MyMenu::PushStartButton()
         break;
     default:
         break;
-    }
-    mainpara->chooseimg->setVisible(true);
-    mainpara->startPossion(mainpara->GetIteration(), type);
+    }*/
+    //mainpara->chooseimg->setVisible(true);
+    mainpara->startPossion(mainpara->GetIteration(), mainpara->GetType());
 }
