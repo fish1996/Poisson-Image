@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QFileDialog>
 #include <QVBoxLayout>
+#include <QStackedWidget>
 
 class QAction;
 class QMenu;
@@ -61,7 +62,7 @@ private:
    void createContentMenu();   //创建上下文菜单
    void createButtons();
    void drawButtons();
-   void updataButtons(Type tempT, QVBoxLayout *Add);
+   void updataButtons(Type tempT);
 
 private:
    para *mainpara;
@@ -117,7 +118,13 @@ private:
    QLayout *OriImage;
    QLayout *TarImage;
 
-   QVBoxLayout *ControlLayout;
+   QVBoxLayout *NorLayout;
+   QVBoxLayout *MixLayout;
+   QVBoxLayout *TexLayout;
+   QVBoxLayout *ColLayout;
+   QVBoxLayout *LigLayout;
+   QVBoxLayout *SplLayout;
+
    //QLabel *chooseimg = new QLabel;
 };
 #endif // MYMENU_H

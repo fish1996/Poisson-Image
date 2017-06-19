@@ -204,6 +204,7 @@ void MyMenu::drawButtons()
 {
     Type tempT = mainpara->GetType();
 
+    /*RadLabel = new QLabel;
     QLabel *RadLabel = new QLabel;
     if(tempT == NORMAL)
         RadLabel->setText(QStringLiteral("无缝克隆"));
@@ -220,7 +221,7 @@ void MyMenu::drawButtons()
     else if(tempT == OPTIMISED)
         RadLabel->setText(QStringLiteral("优化无缝"));
     else if(tempT == SPLICING)
-        RadLabel->setText(QStringLiteral("无缝拼接"));
+        RadLabel->setText(QStringLiteral("无缝拼接"));*/
 
     QLabel *IteraLabel = new QLabel;
     IteraLabel->setText(QStringLiteral("迭代次数"));
@@ -346,35 +347,21 @@ void MyMenu::drawButtons()
     ColorLayout->addLayout(BlueLayout);
 
     QVBoxLayout *ControlLayout = new QVBoxLayout;
-    ControlLayout->addWidget(RadLabel);
-    ControlLayout->addStretch();
+    //ControlLayout->addWidget(RadLabel);
+    //ControlLayout->addStretch();
     ControlLayout->addLayout(ChooseLayout);
     ControlLayout->addStretch();
     ControlLayout->addLayout(Itera);
-    if(tempT == NORMAL || tempT == OPTIMISED || tempT == GRAY){
-        ControlLayout->addStretch();
-        ControlLayout->addLayout(Slider);
-    }
-    else if(tempT == MIXED){
-        //RadLabel->setText(QStringLiteral("梯度混合"));
-    }
-    else if(tempT == TEXTURE){
-        ControlLayout->addStretch();
-        ControlLayout->addLayout(ThresLayout);
-        ControlLayout->addStretch();
-        ControlLayout->addLayout(OperatorLayout);
-    }
-    else if(tempT == COLOR){
-        ControlLayout->addStretch();
-        ControlLayout->addLayout(ColorLayout);
-    }
-    else if(tempT == LIGHT){
-        ControlLayout->addStretch();
-        ControlLayout->addLayout(LightLayout);
-    }
-    else if(tempT == SPLICING){
-        //RadLabel->setText(QStringLiteral("无缝拼接"));
-    }
+    ControlLayout->addStretch();
+    ControlLayout->addLayout(Slider);
+    ControlLayout->addStretch();
+    ControlLayout->addLayout(ThresLayout);
+    ControlLayout->addStretch();
+    ControlLayout->addLayout(OperatorLayout);
+    ControlLayout->addStretch();
+    ControlLayout->addLayout(ColorLayout);
+    ControlLayout->addStretch();
+    ControlLayout->addLayout(LightLayout);
     ControlLayout->addStretch();
     ControlLayout->addLayout(ButtonLayout);
     ControlLayout->addStretch();
@@ -402,6 +389,7 @@ void MyMenu::drawButtons()
     QWidget* widget = new QWidget(this);
     widget->setLayout(mainLayout);
     this->setCentralWidget(widget);
+    //updataButtons(NORMAL);
 }
 
 void MyMenu::ChooseSrcActionSlot()
@@ -447,8 +435,6 @@ void MyMenu::SeamlessCloningSlot()
 {
     if(mainpara->GetType() != NORMAL){
         mainpara->updataType(NORMAL);
-        if(mainpara->GetType() != OPTIMISED && mainpara->GetType() != GRAY)
-            drawButtons();
     }
 }
 
@@ -456,7 +442,6 @@ void MyMenu::GradientMixingSlot()
 {
     if(mainpara->GetType() != MIXED){
         mainpara->updataType(MIXED);
-        drawButtons();
     }
 }
 
@@ -464,7 +449,6 @@ void MyMenu::TextureSmoothingSlot()
 {
     if(mainpara->GetType() != TEXTURE){
         mainpara->updataType(TEXTURE);
-        drawButtons();
     }
 }
 
@@ -472,7 +456,6 @@ void MyMenu::LightingChangeSlot()
 {
     if(mainpara->GetType() != LIGHT){
         mainpara->updataType(LIGHT);
-        drawButtons();
     }
 }
 
@@ -480,7 +463,6 @@ void MyMenu::ColorChangeSlot()
 {
     if(mainpara->GetType() != COLOR){
         mainpara->updataType(COLOR);
-        drawButtons();
     }
 }
 
@@ -488,8 +470,6 @@ void MyMenu::OptimisedCloningSlot()
 {
     if(mainpara->GetType() != OPTIMISED){
         mainpara->updataType(OPTIMISED);
-        if(mainpara->GetType() != NORMAL && mainpara->GetType() != NORMAL)
-            drawButtons();
     }
 }
 
@@ -497,8 +477,6 @@ void MyMenu::IntensityChangeSlot()
 {
     if(mainpara->GetType() != GRAY){
         mainpara->updataType(GRAY);
-        if(mainpara->GetType() != OPTIMISED && mainpara->GetType() != NORMAL)
-            drawButtons();
     }
 }
 
@@ -506,7 +484,6 @@ void MyMenu::SeamlessSplicingSlot()
 {
     if(mainpara->GetType() != SPLICING){
         mainpara->updataType(SPLICING);
-        drawButtons();
     }
 }
 
@@ -594,43 +571,25 @@ void MyMenu::BJudge(int B)
 
 void MyMenu::PushChooseButton()
 {
+    Type tmp = mainpara->GetType();
     mainpara->scr->GetMask();
     mainpara->scr->finish();
     mainpara->chooseimg->GetImg(mainpara->scr->PutFitALP());
-    mainpara->chooseimg->setVisible(true);
-    mainpara->chooseimg->CanMoveImg();
+    if(tmp == NORMAL || tmp == MIXED || tmp == GRAY || tmp == OPTIMISED)
+        mainpara->chooseimg->setVisible(true);
+    mainpara->chooseimg->CanMoveImgP();
 }
 
 void MyMenu::PushReButton()
 {
     mainpara->scr->clear();
     mainpara->chooseimg->setVisible(false);
-    mainpara->chooseimg->CanMoveImg();
+    mainpara->chooseimg->CanMoveImgR();
     //chooseimg->move(10,10);
 }
 
 void MyMenu::PushStartButton()
 {
-    /*Type type;
-    switch (mainpara->GetOper()) {
-    case 0:
-        type = NORMAL;
-        break;
-    case 1:
-        type = GRADIENT;
-        break;
-    case 2:
-        type = TEXTURE;
-        break;
-    case 3:
-        type = LIGHT;
-        break;
-    case 4:
-        type = COLOR;
-        break;
-    default:
-        break;
-    }*/
-    //mainpara->chooseimg->setVisible(true);
     mainpara->startPossion(mainpara->GetIteration(), mainpara->GetType());
+    mainpara->scr->clear();
 }

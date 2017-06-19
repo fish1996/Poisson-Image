@@ -86,6 +86,7 @@ private:
 public:
     void start(Type type);
     void open(QString filename);
+    void show(Mat ans);
     void clear();
     void finish();
 };

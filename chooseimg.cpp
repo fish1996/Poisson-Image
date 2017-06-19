@@ -8,9 +8,14 @@ ChooseImg::ChooseImg():QLabel()
     old = QPoint(0, 0);
 }
 
-void ChooseImg::CanMoveImg()
+void ChooseImg::CanMoveImgP()
 {
-    CanMove = !CanMove;
+    CanMove = true;
+}
+
+void ChooseImg::CanMoveImgR()
+{
+    CanMove = false;
 }
 
 void ChooseImg::ChangeW(float cw)

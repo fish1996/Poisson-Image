@@ -714,14 +714,13 @@ void Poisson::run_gray()
 {
     Mat *GraySrc = new Mat();
     *GraySrc = addImg->clone();
-    qDebug()<<"start";
     cvtColor(*addImg, *GraySrc, COLOR_BGR2GRAY);
-    qDebug()<<"ra";
-    imshow("r",*GraySrc);
     cal_gradient(GraySrc);
 
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
     solve_poisson1();
+
+    delete GraySrc;
 }
 
 Mat* Poisson::run(Type type)

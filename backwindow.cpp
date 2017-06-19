@@ -58,6 +58,47 @@ void backwindow::open(QString filename)
     update();
 }
 
+void backwindow::show(Mat ans)
+{
+    Mat rgb;
+    QImage img;
+    rgb=ans.clone();
+    for(int i = 0; i < ans.channels(); i++){
+        for(int j = 0; j < ans.rows; j++){
+            for(int k = 0; k < ans.cols; k++){
+                rgb.at<Vec3f>(j,k)[i] *= 255;
+            }
+        }
+    }
+    rgb.convertTo(rgb, CV_8U);
+    if(ans.channels() == 3)    // RGB image
+    {
+        cvtColor(rgb,rgb,CV_BGR2RGB);
+        img = QImage((uchar*)rgb.data,  //(const unsigned char*)
+                     rgb.cols,rgb.rows,
+                     rgb.cols*rgb.channels(),   //new add
+                     QImage::Format_RGB888);
+    }
+    else if(ans.channels() == 1)                       // gray image
+    {
+        img = QImage((const uchar*)(ans.data),
+                     ans.cols,ans.rows,
+                     ans.cols*ans.channels(),    //new add
+                     QImage::Format_Indexed8);
+    }
+    else if(ans.channels() == 4)    // RGB image
+    {
+        //cvtColor(fitImg,rgb,CV_BGR2RGB);
+        img = QImage((const uchar*)(rgb.data),  //(const unsigned char*)
+                     rgb.cols,rgb.rows,
+                     rgb.cols*rgb.channels(),   //new add
+                     QImage::Format_ARGB32);
+    }
+    pix = QPixmap::fromImage(img);
+
+    update();
+}
+
 Mat backwindow::resizemat(Mat img)
 {
     int w = img.cols;
@@ -104,7 +145,7 @@ void backwindow::GetMask()
         for(int i=0;i<=inum;i++){
             drawContours(maskImg,co_ordinates, i, Scalar(255), CV_FILLED, 8 );
         }
-        imshow("a",maskImg);
+        //imshow("a",maskImg);
     }
 
 }
@@ -191,7 +232,7 @@ void backwindow::finish()
     fitsrc=fitsrc(Range(ymin-1,ymax+2),Range(xmin-1,xmax+2));
     fitw = fitmask.cols;
     fith = fitmask.rows;
-    imshow("mask",fitsrc);
+    //imshow("mask",fitsrc);
 
     alphaimg = new Mat(fitsrc.size(),CV_8UC4);
     createAlphaMat(alphaimg);
@@ -229,11 +270,7 @@ void backwindow::paintEvent(QPaintEvent *e)
 
 void backwindow::mousePressEvent(QMouseEvent *e)
 {
-    if(e->button() == Qt::RightButton)
-    {
-    }
-
-    else if(e->button() == Qt::LeftButton)
+    if(e->button() == Qt::LeftButton)
     {
         if(flag){
             inum++;
@@ -254,10 +291,10 @@ void backwindow::mousePressEvent(QMouseEvent *e)
 
 void backwindow::mouseMoveEvent(QMouseEvent *e)
 {
-    int startx = co_ordinates[inum][0].x;
-    int starty = co_ordinates[inum][0].y;
     if(flag && !flags && choosenum == 1)
     {
+        int startx = co_ordinates[inum][0].x;
+        int starty = co_ordinates[inum][0].y;
         QPoint p=e->pos();
         if(p.x()<width && p.y()<height){
             pt_Cur = Point(p.x(),p.y());
@@ -280,6 +317,8 @@ void backwindow::mouseMoveEvent(QMouseEvent *e)
     }
     else if(flag && !flags && choosenum == 0)
     {
+        int startx = co_ordinates[inum][0].x;
+        int starty = co_ordinates[inum][0].y;
         QPoint p=e->pos();
         if(p.x()<width && p.y()<height){
             pt_Cur = Point(p.x(),p.y());
@@ -351,11 +390,11 @@ void backwindow::start(Type type){
     imshow("miao",*ans);*/
     /*poisson = new Poisson();
     poisson->set(&srcImg, &fitsrc, &fitmask, times, x, y, w, h);*/
-    imshow("1",fitsrc);
     //imshow("2",fitmask);
     //imshow("3",srcImg);
     qDebug()<<"fit";
     Mat *ans = poisson->run(type);
-    imshow("miao",*ans);
+    show(*ans);
+    //imshow("miao",*ans);
     //srcImg = *ans;
 }

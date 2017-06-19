@@ -22,7 +22,8 @@ class ChooseImg: public QLabel
 public:
     ChooseImg();
     ~ChooseImg(){}
-    void CanMoveImg();
+    void CanMoveImgP();
+    void CanMoveImgR();
     void GetImg(Mat fitImg);
     void ChangeW(float cw);
     void ChangeH(float ch);
