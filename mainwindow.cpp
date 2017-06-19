@@ -25,7 +25,7 @@ void MainWindow::on_openpushButton_clicked()
     filename = QFileDialog::getOpenFileName(this,
         tr("选择图像"),
         "",
-        tr("Images (*.png *.bmp *.jpg *.tif *.GIF.*jpeg)")); //选择路径
+        tr("Images (*.png *.bmp *.jpg *.tif *.GIF .*jpeg)")); //选择路径
     if(filename.isEmpty())
     {
         return;

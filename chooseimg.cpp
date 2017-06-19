@@ -15,12 +15,22 @@ void ChooseImg::CanMoveImg()
 
 void ChooseImg::ChangeW(float cw)
 {
-    this->resize(w*cw, h);
+    sw = cw*w;
+    qDebug("%f",cw);
+    this->SetImg();
 }
 
 void ChooseImg::ChangeH(float ch)
 {
-    this->resize(w, h*ch);
+    sh = ch*h;
+    this->SetImg();
+}
+
+void ChooseImg::SetImg()
+{
+    pix = pix.scaled(QSize(sw,sh));
+    this->setPixmap(pix);
+    this->resize(this->pixmap()->size());
 }
 
 void ChooseImg::GetImg(Mat fitImg)
@@ -44,7 +54,10 @@ void ChooseImg::GetImg(Mat fitImg)
 
     w = img.width();
     h = img.height();
-    this->setPixmap(QPixmap::fromImage(img));
+    sw = w;
+    sh = h;
+    pix = QPixmap::fromImage(img);
+    this->setPixmap(pix);
     this->resize(this->pixmap()->size());
     this->setGeometry(QRect(0, 0, this->pixmap()->size().width(), this->pixmap()->size().height()));
     this->setVisible(false);

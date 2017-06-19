@@ -10,6 +10,9 @@ void Poisson::init()
 {
     gradientX = nullptr;
     gradientY = nullptr;
+    srcgradientX = nullptr;
+    srcgradientY = nullptr;
+    srcgradient = nullptr;
     srcImg = nullptr;
     addImg = nullptr;
     maskImg = nullptr;
@@ -355,6 +358,8 @@ void Poisson::run_texture()
 {
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
 
+    gradientX = new Mat(Size(width, height), CV_32FC3);
+    gradientY = new Mat(Size(width, height), CV_32FC3);
     cal_gradient(&tmp);
     cal_gradientX(&tmp, gradientX);
     cal_gradientY(&tmp, gradientY);
@@ -374,30 +379,38 @@ void Poisson::run_texture()
 
 void Poisson::canny_texture(Mat out)
 {
-    Mat zeros(gradient->size(), CV_32FC3);
+    Mat zeros( gradient->size(), CV_32FC3);
     zeros.setTo(0);
     Mat zerosMask = ((out) != 255);
+    imshow("zerosMask",zerosMask);
 
-    for (int i = 0; i < gradient->rows; i++) {
-        for (int j = 0; j < gradient->cols; j++) {
-            if (isMask && maskImg->at<float>(i, j) == 0) {
+    for(int i = 0;i < gradient->rows;i++) {
+        for(int j = 0;j < gradient->cols;j++) {
+            if(isMask && maskImg->at<float>(i,j)==0) {
                 continue;
             }
             else{
-                if (zerosMask.at<float>(i, j) != 0){
-                    gradient->at<Vec3f>(i, j)[0] *= 0;
-                    gradient->at<Vec3f>(i, j)[1] *= 0;
-                    gradient->at<Vec3f>(i, j)[2] *= 0;
-                }
-                else
-                {
-                    gradient->at<Vec3f>(i, j)[0] *= gradientX->at<Vec3f>(i, j)[0] - gradientY->at<Vec3f>(i, j)[0];
-                    gradient->at<Vec3f>(i, j)[1] *= gradientX->at<Vec3f>(i, j)[1] - gradientY->at<Vec3f>(i, j)[1];
-                    gradient->at<Vec3f>(i, j)[2] *= gradientX->at<Vec3f>(i, j)[2] - gradientY->at<Vec3f>(i, j)[2];
+                if(zerosMask.at<float>(i,j)!=0){
+                    gradientX->at<Vec3f>(i,j)[0] *= 0;
+                    gradientX->at<Vec3f>(i,j)[1] *= 0;
+                    gradientX->at<Vec3f>(i,j)[2] *= 0;
+                    gradientY->at<Vec3f>(i,j)[0] *= 0;
+                    gradientY->at<Vec3f>(i,j)[1] *= 0;
+                    gradientY->at<Vec3f>(i,j)[2] *= 0;
                 }
             }
         }
     }
+
+    Mat* newgradientX = new Mat(Size(width,height), CV_32FC3);
+    Mat* newgradientY = new Mat(Size(width,height), CV_32FC3);
+
+    cal_LaplacianX(gradientX,newgradientX);
+    cal_LaplacianY(gradientY,newgradientY);
+    *gradient = (*newgradientX) + (*newgradientY);
+
+    delete newgradientX;
+    delete newgradientY;
 }
 
 void Poisson::solve_poisson1()
@@ -534,11 +547,11 @@ void Poisson::cal_gradient(Mat* img)
                     - 4 * img->at<Vec3f>(i, j)[2];
             }
             else if (img->channels() == 1){
-                gradient->at<Vec3f>(i, j)[0] = img->at<uchar>(i - 1, j)
-                    + img->at<uchar>(i + 1, j)
-                    + img->at<uchar>(i, j - 1)
-                    + img->at<uchar>(i, j + 1)
-                    - 4 * img->at<uchar>(i, j);
+                gradient->at<Vec3f>(i, j)[0] = img->at<float>(i - 1, j)
+                    + img->at<float>(i + 1, j)
+                    + img->at<float>(i, j - 1)
+                    + img->at<float>(i, j + 1)
+                    - 4 * img->at<float>(i, j);
                 gradient->at<Vec3f>(i, j)[1] = gradient->at<Vec3f>(i, j)[0];
                 gradient->at<Vec3f>(i, j)[2] = gradient->at<Vec3f>(i, j)[0];
             }
@@ -631,6 +644,12 @@ void Poisson::cal_LaplacianY(Mat* img, Mat* gradientY)
 
 void Poisson::run_mixed()
 {
+    srcgradient = new Mat(Size(width, height), CV_32FC3);
+    srcgradientX = new Mat(Size(width, height), CV_32FC3);
+    srcgradientY = new Mat(Size(width, height), CV_32FC3);
+    gradientX = new Mat(Size(width, height), CV_32FC3);
+    gradientY = new Mat(Size(width, height), CV_32FC3);
+
     tmp = (*srcImg)(Rect(beginw, beginh, width, height));
     cal_gradient(&tmp);
     gradient->copyTo(*srcgradient);
@@ -708,11 +727,6 @@ Mat* Poisson::run(Type type)
 
 
     gradient = new Mat(Size(width, height), CV_32FC3);
-    gradientX = new Mat(Size(width, height), CV_32FC3);
-    gradientY = new Mat(Size(width, height), CV_32FC3);
-    srcgradient = new Mat(Size(width, height), CV_32FC3);
-    srcgradientX = new Mat(Size(width, height), CV_32FC3);
-    srcgradientY = new Mat(Size(width, height), CV_32FC3);
 
     if (type == NORMAL) {
 
@@ -750,6 +764,15 @@ Mat* Poisson::run(Type type)
     }
     if (gradientY != nullptr) {
         delete gradientY;
+    }
+    if (srcgradientX != nullptr) {
+        delete gradientX;
+    }
+    if (srcgradientY != nullptr) {
+        delete gradientY;
+    }
+    if (srcgradient != nullptr) {
+        delete gradientX;
     }
     delete gradient;
     return srcImg;

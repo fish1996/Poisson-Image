@@ -12,6 +12,7 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QDebug>
+#include <QPixmap>
 using namespace std;
 using namespace cv;
 
@@ -25,9 +26,13 @@ public:
     void GetImg(Mat fitImg);
     void ChangeW(float cw);
     void ChangeH(float ch);
+    void SetImg();
     int w;
     int h;
+    int sw;
+    int sh;
     QPoint ImgPos;
+    QPixmap pix;
 
 protected:
     void mousePressEvent(QMouseEvent *);

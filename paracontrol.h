@@ -22,8 +22,8 @@ public:
     int GetOper();
     int GetChoose();
     int GetIteration();
-    int GetHscaling();
-    int GetVscaling();
+    float GetHscaling();
+    float GetVscaling();
     void ChangeChoose(int choosenum);
 
     backwindow *scr;
