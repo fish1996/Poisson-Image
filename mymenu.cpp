@@ -260,14 +260,14 @@ void MyMenu::IneraJudge(int inera)
 
 void MyMenu::HscalingJudge(int hs)
 {
-    mainpara->updataHscaling(hs / 200.0);
-    mainpara->chooseimg->ChangeH(mainpara->GetHscaling());
+    mainpara->updataHscaling(hs);
+    mainpara->chooseimg->ChangeW(mainpara->GetHscaling());
 }
 
 void MyMenu::VscalingJudge(int vs)
 {
-    mainpara->updataVscaling((vs / 200.0));
-    mainpara->chooseimg->ChangeW(mainpara->GetVscaling());
+    mainpara->updataVscaling(vs);
+    mainpara->chooseimg->ChangeH(mainpara->GetVscaling());
 }
 
 void MyMenu::PushChooseButton()
@@ -309,6 +309,6 @@ void MyMenu::PushStartButton()
     default:
         break;
     }
-
+    mainpara->chooseimg->setVisible(true);
     mainpara->startPossion(mainpara->GetIteration(), type);
 }

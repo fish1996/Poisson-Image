@@ -547,11 +547,11 @@ void Poisson::cal_gradient(Mat* img)
                     - 4 * img->at<Vec3f>(i, j)[2];
             }
             else if (img->channels() == 1){
-                gradient->at<Vec3f>(i, j)[0] = img->at<uchar>(i - 1, j)
-                    + img->at<uchar>(i + 1, j)
-                    + img->at<uchar>(i, j - 1)
-                    + img->at<uchar>(i, j + 1)
-                    - 4 * img->at<uchar>(i, j);
+                gradient->at<Vec3f>(i, j)[0] = img->at<float>(i - 1, j)
+                    + img->at<float>(i + 1, j)
+                    + img->at<float>(i, j - 1)
+                    + img->at<float>(i, j + 1)
+                    - 4 * img->at<float>(i, j);
                 gradient->at<Vec3f>(i, j)[1] = gradient->at<Vec3f>(i, j)[0];
                 gradient->at<Vec3f>(i, j)[2] = gradient->at<Vec3f>(i, j)[0];
             }

@@ -60,7 +60,7 @@ void para::updataItera(int iteration)
 
 void para::updataHscaling(int hsacling)
 {
-    this->hscaling = hscaling / 200.0;
+    this->hscaling = hsacling / 200.0;
 
     return;
 }
@@ -91,8 +91,9 @@ void para::PassMaskAndSrc()
 
 void para::startPossion(int times, Type type)
 {
+    this->scr->ChangeSize(chooseimg->sw, chooseimg->sh);
     this->PassMaskAndSrc();
-    qDebug("w&h:%d,%d\n", chooseimg->w, chooseimg->h);
+    //qDebug("w&h:%d,%d\n", chooseimg->w, chooseimg->h);
     this->dst->start(times, chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h,type);
 }
 
@@ -111,12 +112,12 @@ int para::GetIteration()
     return this->iteration;
 }
 
-int para::GetHscaling()
+float para::GetHscaling()
 {
     return this->hscaling;
 }
 
-int para::GetVscaling()
+float para::GetVscaling()
 {
     return this->vscaling;
 }
