@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     poisson.cpp \
     chooseimg.cpp \
     mymenu.cpp \
-    paracontrol.cpp
+    paracontrol.cpp \
+    labtransfer.cpp
 
 HEADERS  += mainwindow.h \
     backwindow.h \
@@ -26,7 +27,8 @@ HEADERS  += mainwindow.h \
     poisson.h \
     chooseimg.h \
     mymenu.h \
-    paracontrol.h
+    paracontrol.h \
+    labtransfer.h
 
 FORMS    += \
     mainwindow.ui

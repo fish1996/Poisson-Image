@@ -13,7 +13,7 @@ para::para()
     this->R = 0;
     this->G = 0;
     this->B = 0;
-    this->ope = 3;
+    this->oper = 3;
     this->alpha = 0.2;
     this->beta = 0.4;
 
@@ -118,20 +118,22 @@ void para::startPossion(int times, Type type)
     else if(type == TEXTURE){
         this->dst->srcImg = this->scr->srcImg;
         this->dst->maskImg = this->scr->maskImg;
-        this->dst->poisson->set(&dst->srcImg, &dst->maskImg, (float)min, (float)max, ope, times,
-                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+        imshow("mask",dst->maskImg);
+        qDebug("%d,%d,%d,%d,%d,%d,%d",min,max,oper,scr->fitx, scr->fity, scr->fitw, scr->fith);
+        this->dst->poisson->set(&dst->srcImg, &dst->fitmask, (float)min, (float)max, oper, times,
+                                scr->fitx, scr->fity, scr->fitw, scr->fith);
     }
     else if(type == LIGHT){
         this->dst->srcImg = this->scr->srcImg;
         this->dst->maskImg = this->scr->maskImg;
-        this->dst->poisson->set(&dst->srcImg, &dst->maskImg, alpha, beta, times,
-                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+        this->dst->poisson->set(&dst->srcImg, &dst->fitmask, alpha, beta, times,
+                                scr->fitx, scr->fity, scr->fitw, scr->fith);
     }
     else if(type == COLOR){
         this->dst->srcImg = this->scr->srcImg;
         this->dst->maskImg = this->scr->maskImg;
-        this->dst->poisson->set(&dst->srcImg, &dst->maskImg, Color(R, G, B), times,
-                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
+        this->dst->poisson->set(&dst->srcImg, &dst->fitmask, Color(R, G, B), times,
+                                scr->fitx, scr->fity, scr->fitw, scr->fith);
     }
     else if(type == OPTIMISED){
         qDebug()<<"OPTIMISED";

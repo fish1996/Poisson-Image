@@ -12,6 +12,7 @@ enum Type {
     MIXED,
     SPLICING,
     OPTIMISED,
+    TRANSFER,
 };
 
 #endif // TYPE_H

@@ -53,6 +53,8 @@ public:
     int height;
     int fitw; //用于记录切割后掩码图的原宽
     int fith;
+    int fitx;
+    int fity;
     Mat fitsrc;//被割过的原图
     Mat fitmask;//fitsrc对应的掩码图
     Mat srcImg;

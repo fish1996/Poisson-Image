@@ -233,6 +233,8 @@ void backwindow::finish()
     fitw = fitmask.cols;
     fith = fitmask.rows;
     //imshow("mask",fitsrc);
+    fitx = xmin - 1;
+    fity = ymin - 1;
 
     alphaimg = new Mat(fitsrc.size(),CV_8UC4);
     createAlphaMat(alphaimg);

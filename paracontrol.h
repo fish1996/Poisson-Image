@@ -32,7 +32,7 @@ public:
 
     int max,min;
     int R, G, B;
-    int ope;
+    int oper;
     float alpha, beta;
 
 private:

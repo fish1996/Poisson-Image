@@ -155,7 +155,7 @@ void MyMenu::createButtons()
     OperatorGroup->addButton(Operator3,3);
     OperatorGroup->addButton(Operator5,5);
     OperatorGroup->addButton(Operator7,7);
-    connect(ChooseGroup, SIGNAL(buttonClicked(int)), this, SLOT(OperatorJudge(int)));
+    connect(OperatorGroup, SIGNAL(buttonClicked(int)), this, SLOT(OperatorJudge(int)));
 
     alphaL = new QSlider(Qt::Horizontal);
     alphaL->setRange(0,20);
@@ -529,9 +529,10 @@ void MyMenu::MaxTBoxJudge(int max)
     mainpara->max = max;
 }
 
-void MyMenu::OperatorJudge(int ope)
+void MyMenu::OperatorJudge(int oper)
 {
-    mainpara->ope = ope;
+    mainpara->oper = oper;
+    qDebug("ope:%d",oper);
 }
 
 void MyMenu::alphaLJudge(int alpha)
