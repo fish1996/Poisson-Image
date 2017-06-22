@@ -64,7 +64,7 @@ void MyMenu::createAction()
    IntensityChange = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("强度改变"), this);
    connect(IntensityChange, SIGNAL(triggered()), this, SLOT(IntensityChangeSlot()));
 
-   SeamlessSplicing = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("无缝拼接"), this);
+   SeamlessSplicing = new QAction(QIcon(tr("images/open.ico")), QStringLiteral("颜色迁移"), this);
    connect(SeamlessSplicing, SIGNAL(triggered()), this, SLOT(SeamlessSplicingSlot()));
 }
 void MyMenu::createMenu()
@@ -482,8 +482,8 @@ void MyMenu::IntensityChangeSlot()
 
 void MyMenu::SeamlessSplicingSlot()
 {
-    if(mainpara->GetType() != SPLICING){
-        mainpara->updataType(SPLICING);
+    if(mainpara->GetType() != TRANSFER){
+        mainpara->updataType(TRANSFER);
     }
 }
 

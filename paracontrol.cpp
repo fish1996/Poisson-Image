@@ -138,8 +138,10 @@ void para::startPossion(int times, Type type)
         this->dst->poisson->set(&dst->srcImg, &dst->fitsrc, &dst->fitmask, times,
                                 chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
     }
-    else if(type == SPLICING){
-        //
+    else if(type == TRANSFER){
+        qDebug()<<"TRANSFER";
+        this->dst->poisson->set(&dst->srcImg, &dst->fitsrc, &dst->fitmask, times,
+                                chooseimg->ImgPos.x(), chooseimg->ImgPos.y(), chooseimg->w, chooseimg->h);
     }
     else
         return;

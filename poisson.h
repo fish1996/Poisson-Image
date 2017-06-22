@@ -9,6 +9,7 @@
 #include <opencv2/opencv.hpp>
 #include "type.h"
 #include "color.h"
+#include "labtransfer.h"
 
 using namespace cv;
 class Poisson
@@ -43,6 +44,8 @@ private:
     float alpha;
     float beta;
 
+    LABtransfer *lab; //表示颜色迁移类的对象
+
     int iterTimes;// iterTimes迭代次数
     int factor;
     float max;
@@ -59,6 +62,7 @@ private:
     void run_texture();
     void run_light();
     void run_mixed();
+    void run_transfer();
 
     void cal_light(float& g,float m);
     void multi_light();

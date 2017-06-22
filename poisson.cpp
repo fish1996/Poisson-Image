@@ -9,6 +9,7 @@ Poisson::Poisson()
 
 void Poisson::init()
 {
+    lab = nullptr;
     gradientX = nullptr;
     gradientY = nullptr;
     srcgradientX = nullptr;
@@ -723,6 +724,21 @@ void Poisson::run_gray()
     delete GraySrc;
 }
 
+void Poisson::run_transfer()
+{
+
+    lab = new LABtransfer();
+
+    lab->Getimg(addImg,srcImg);
+    Mat newaddimg = lab->OutPut();
+
+    cal_gradient(&newaddimg);
+
+    tmp = (*srcImg)(Rect(beginw, beginh, width, height));
+    solve_poisson1();
+
+}
+
 Mat* Poisson::run(Type type)
 {
     srcImg->convertTo(*srcImg, CV_32F, 1.0f / 255);
@@ -761,6 +777,9 @@ Mat* Poisson::run(Type type)
     else if (type == MIXED) {
         run_mixed();
     }
+    else if (type == TRANSFER) {
+        run_transfer();
+    }
     if (maskImg != nullptr) {
         delete maskImg;
     }
@@ -784,6 +803,9 @@ Mat* Poisson::run(Type type)
     }
     if (srcgradient != nullptr) {
         delete srcgradient;
+    }
+    if (lab != nullptr) {
+        delete lab;
     }
     delete gradient;
     return srcImg;
